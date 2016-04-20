@@ -1,5 +1,5 @@
 ---
-title: "vaersND: examples"
+title: "FEWSR: examples"
 author: "Irucka Embry"
 output: rmarkdown::html_vignette
 vignette: >
@@ -27,51 +27,12 @@ The remaining three variables (`treat`, `narrow`, and `wide`) represent the expe
 
 # Examples
 ```R
-library(vaersND)
+library(FEWSR)
 library(data.table)
 library(dplyr)
 library(rpivotTable)
 
 
-## load vaersND_data
-data(vaersND_data)
-
-# How many reports for each sex?
-count(vaersND_data, SEX)
-
-# Identify the VAERS_IDs for males only.
-setkey(vaersND_data, VAERS_ID)
-
-vaersND_data[SEX == "M"][, 1, with = FALSE]
-
-# Create a pivot table of this data.
-rpivotTable(vaersND_data)
-
-
-# Using vaersND_symptoms
-data(vaersND_symptoms)
-
-# How many reports of autism for SYMPTOM1?
-setkey(vaersND_symptoms, VAERS_ID)
-
-nrow(vaersND_symptoms[SYMPTOM1 == "Autism"])
-
-# Create a pivot table of this data.
-rpivotTable(vaersND_symptoms)
-
-
-## Using vaersND_vax
-data(vaersND_vax)
-
-# What are the counts for each of the VAX_TYPEs?
-count(vaersND_vax, VAX_TYPE)
-
-
-# How many reports of MMR as the VAX_TYPE?
-nrow(vaersND_vax[VAX_TYPE == "MMR"])
-
-# Create a pivot table of this data.
-rpivotTable(vaersND_vax)
 ```
 
 
