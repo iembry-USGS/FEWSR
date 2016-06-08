@@ -12,19 +12,14 @@ vignette: >
 # devtools::load_all()
 ```
 
-
+<br />
+<br />
 
 # Examples
 ```R
-library(FEWSR)
-library(data.table)
-library(dplyr)
-library(rpivotTable)
-
-
 # Example to check the input file format
 library(FEWSR)
-# library(openxlsx)
+library(openxlsx)
 
 # Copy and paste the following code into the R console if you
 # wish to see the input file format for the Lake plants.
@@ -46,8 +41,8 @@ openXL(system.file("extdata", "FEWS_River_plants_input.xlsx",
 package = "FEWSR"))
   # opens the workbook using the default spreadsheet application
 
-
-
+<br />
+<br />
 
 # Examples to show you different use cases
 library(FEWSR)

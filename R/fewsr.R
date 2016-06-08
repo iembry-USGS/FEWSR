@@ -55,7 +55,7 @@
 #' \dontrun{
 #' # Example to check the input file format
 #' library(FEWSR)
-#' # library(openxlsx)
+#' library(openxlsx)
 #'
 #' # Copy and paste the following code into the R console if you
 #' # wish to see the input file format for the Lake plants.
