@@ -1,12 +1,11 @@
-#' FEWS Multiplant plants -- lake, pond, river (version 3.104) -- interactive
-#' file input
+#' FEWS Multiplant plants -- lake, pond, river (version 3.104) -- non-
+#' interactive file input
 #'
 #' Draft Model of Forced Evaporation from a Water Surface, with user choice of
 #'     wind function
 #' Multiplant Lake/Pond/River Version 3.104 - 2012/12/15
 #'
-#' @param file Input file will be selected through a file dialog
-#'          (.xlsx or .csv)
+#' @param file Input file (.xlsx or .csv)
 #' @param sheet Sheet number or sheet name for the input file
 #' @param type The type of surface water feature (lake, pond, river)
 #' @param output The output format of the resulting spreadsheet
@@ -76,23 +75,27 @@
 #' openXL(system.file("extdata", "FEWS_River_plants_input.xlsx",
 #' package = "FEWSR"))
 #'   # opens the workbook using the default spreadsheet application
-#'
+#' }
 #'
 #'
 #'
 #' # Examples to show you different use cases
 #' library(FEWSR)
-#' fewsr(sheet = "Input", type = "pond", output = "csv")
-#' # The sheet name is "Input" and the surface water is pond
+#' fewsr2(system.file("extdata", "FEWS_Pond_plants_input.xlsx",
+#' package = "FEWSR"), type = "pond", output = "csv")
+#' # The sheet number is 1 (default) and the surface water is pond
 #'
 #'
-#' fewsr(type = "river", output = "xlsx")
+#' fewsr2(system.file("extdata", "FEWS_River_plants_input.xlsx",
+#' package = "FEWSR"), type = "river", output = "xlsx"
 #' # The sheet number is 1 (default) and the surface water is river
 #'
 #'
-#' fewsr(sheet = 4, type = "lake", output = "both")
-#' # The sheet number is 4 and the surface water is lake
-#' }
+#' fewsr2(system.file("extdata", "FEWS_BIG_Lake_plants_input.xlsx",
+#' package = "FEWSR"), type = "lake", output = "both")
+#' # The sheet number is 1 (default) and the surface water is lake
+#'
+#'
 #'
 #' @import readxl
 #' @import openxlsx
@@ -103,7 +106,7 @@
 #' @import data.table
 #'
 #' @export
-fewsr <- function (file = tk_choose.files(default = "", caption = "Select file to open", multi = FALSE, filters = matrix(c("Comma-separated value file", ".csv", "MS Excel spreadsheet", ".xlsx", "MS Excel 97-2003 spreadsheet", ".xls"), 6, 2, byrow = TRUE)), sheet = 1, type = c("lake", "pond", "river"), output  = c("csv", "xlsx", "both")) {
+fewsr2 <- function (file, sheet = 1, type = c("lake", "pond", "river"), output  = c("csv", "xlsx", "both")) {
 
 if (!nchar(file)) {
 
