@@ -102,6 +102,8 @@
 #' @import gWidgets2
 #' @import gWidgets2tcltk
 #' @import data.table
+#' @import grDevices
+#' @import utils
 #'
 #' @export
 fewsr2 <- function (file, sheet = 1, type = c("lake", "pond", "river"), output  = c("csv", "xlsx", "both")) {

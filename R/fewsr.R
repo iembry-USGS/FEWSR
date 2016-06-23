@@ -101,6 +101,8 @@
 #' @import gWidgets2
 #' @import gWidgets2tcltk
 #' @import data.table
+#' @import grDevices
+#' @import utils
 #'
 #' @export
 fewsr <- function (file = tk_choose.files(default = "", caption = "Select file to open", multi = FALSE, filters = matrix(c("Comma-separated value file", ".csv", "MS Excel spreadsheet", ".xlsx", "MS Excel 97-2003 spreadsheet", ".xls"), 6, 2, byrow = TRUE)), sheet = 1, type = c("lake", "pond", "river"), output  = c("csv", "xlsx", "both")) {
