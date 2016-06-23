@@ -4,16 +4,16 @@ Version: 1.0.0
 Depends: R (>= 3.0.0), tcltk, data.table (>= 1.9.4)
 Imports: readxl, openxlsx, ggplot2 (>= 0.9.0), gWidgets2, gWidgets2tcltk
 Suggests: Rcpp (>= 0.11.5), knitr, rmarkdown
-Author: Timothy H. Diehl, of the United States Geological Survey (USGS),
-    created the original FEWS models as Microsoft Excel(R) spreadsheets.
-    The FEWS models appeared in 2 USGS reports
+Author: Timothy H. Diehl [aut, cre] (Microsoft Excel(R) spreadsheets),
+    Irucka Embry [aut] (R code)
+Maintainer: Irucka Embry <iembry@usgs.gov>
+Description: FEWS river, lake, and pond models used to obtain the
+    evapotranspiration from surface waters in power plants. The FEWS models
+    appeared in 2 USGS reports
     (http://pubs.er.usgs.gov/publication/sir20145184
     and http://pubs.er.usgs.gov/publication/sir20135188). Irucka Embry, while a
     Cherokee Nation Technology Solutions (CNTS) USGS Contractor, translated
     those functions into R.
-Maintainer: Irucka Embry <iembry@usgs.gov>
-Description: FEWS river, lake, and pond models used to obtain the
-    evapotranspiration from surface waters in power plants.
 URL: https://github.com/iembry-USGS/FEWSR
 BugReports: https://github.com/iembry-USGS/FEWSR/issues
 License: CC0
