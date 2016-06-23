@@ -58,8 +58,8 @@ Multiplant Lake/Pond/River Version 3.104 - 2012/12/15
 }
 \examples{
 \dontrun{
-# Example to check the input file format
 library(FEWSR)
+# Examples to check the input file format
 
 # Copy and paste the following code into the R console if you
 # wish to see the input file format for the Lake plants.
@@ -84,8 +84,7 @@ package = "FEWSR"))
 
 
 
-# Examples to show you different use cases
-library(FEWSR)
+# Examples to show different use cases
 fewsr(sheet = "Input", type = "pond", output = "csv")
 # The sheet name is "Input" and the surface water is pond
 
@@ -97,6 +96,7 @@ fewsr(type = "river", output = "xlsx")
 fewsr(sheet = 4, type = "lake", output = "both")
 # The sheet number is 4 and the surface water is lake
 }
+
 
 }
 \author{
