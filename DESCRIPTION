@@ -1,8 +1,9 @@
 Package: FEWSR
 Title: FEWS Multiplant Model
 Version: 1.0.0
-Depends: R (>= 3.0.0), tcltk, data.table (>= 1.9.4)
-Imports: readxl, openxlsx, ggplot2 (>= 0.9.0), gWidgets2, gWidgets2tcltk
+Depends: R (>= 3.0.0), utils, tcltk, data.table (>= 1.9.4)
+Imports: readxl, openxlsx, grDevices, ggplot2 (>= 0.9.0), gWidgets2,
+    gWidgets2tcltk
 Suggests: Rcpp (>= 0.11.5), knitr, rmarkdown
 Author: Timothy H. Diehl [aut, cre] (Microsoft Excel(R) spreadsheets),
     Irucka Embry [aut] (R code)

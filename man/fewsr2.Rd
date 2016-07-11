@@ -59,6 +59,7 @@ library(FEWSR)
 
 # Copy and paste the following code into the R console if you
 # wish to see the input file format for the Lake plants.
+library(openxlsx)
 openXL(system.file("extdata", "FEWS_BIG_Lake_plants_input.xlsx",
 package = "FEWSR"))
   # opens the workbook using the default spreadsheet application
@@ -66,6 +67,7 @@ package = "FEWSR"))
 
 # Copy and paste the following code into the R console if you
 # wish to see the input file format for the Pond plants.
+library(openxlsx)
 openXL(system.file("extdata", "FEWS_Pond_plants_input.xlsx",
 package = "FEWSR"))
   # opens the workbook using the default spreadsheet application
@@ -73,6 +75,7 @@ package = "FEWSR"))
 
 # Copy and paste the following code into the R console if you
 # wish to see the input file format for the River plants.
+library(openxlsx)
 openXL(system.file("extdata", "FEWS_River_plants_input.xlsx",
 package = "FEWSR"))
   # opens the workbook using the default spreadsheet application
