@@ -56,12 +56,12 @@
 #'
 #' @examples
 #' \dontrun{
-#' library(FEWSR)
+#' library("FEWSR")
 #' # Examples to check the input file format
 #'
 #' # Copy and paste the following code into the R console if you
 #' # wish to see the input file format for the Lake plants.
-#' library(openxlsx)
+#' library("openxlsx")
 #' openXL(file.path(system.file("extdata", "FEWS_BIG_Lake_plants_input.xlsx",
 #' package = "FEWSR")))
 #'   # opens the workbook using the default spreadsheet application
@@ -69,7 +69,7 @@
 #'
 #' # Copy and paste the following code into the R console if you
 #' # wish to see the input file format for the Pond plants.
-#' library(openxlsx)
+#' library("openxlsx")
 #' openXL(file.path(system.file("extdata", "FEWS_Pond_plants_input.xlsx",
 #' package = "FEWSR")))
 #'   # opens the workbook using the default spreadsheet application
@@ -77,7 +77,7 @@
 #'
 #' # Copy and paste the following code into the R console if you
 #' # wish to see the input file format for the River plants.
-#' library(openxlsx)
+#' library("openxlsx")
 #' openXL(file.path(system.file("extdata", "FEWS_River_plants_input.xlsx",
 #' package = "FEWSR")))
 #'   # opens the workbook using the default spreadsheet application
@@ -161,26 +161,29 @@ for (col in change_class) set(inputwind, j = col, value = as.numeric(inputwind[[
 
 ## Return to fewsronly
 
-fewsronly <- fewsronly[!1:5] # remove rows 1:5
+fewsronly <- fewsronly[!1:5, ] # remove rows 1:5
 setnames(fewsronly, 1, "Plant_ID")
 setkey(fewsronly, Plant_ID)
 
 
-# changing column to integer class
+# changing column to character class
 # obtain the name of the column based on the column number
-#change_class1 <- "Plant_ID"
-#for (col in change_class1) set(fewsronly, j = col, value = as.integer(fewsronly[[col]])) # Source 4
-#setkey(fewsronly, Plant_ID)
+change_class1 <- "Plant_ID"
+for (col in change_class1) set(fewsronly, j = col, value = as.character(fewsronly[[col]])) # Source 4
+setkey(fewsronly, Plant_ID)
+
 
 # changing columns to numeric class
 # obtain the name of the column based on the column number
-change_class2 <- names(fewsronly[2:ncol(fewsronly)]) # name of all columns except column 1
+change_class2 <- names(fewsronly[, 2:ncol(fewsronly)]) # name of all columns except column 1
 for (col in change_class2) set(fewsronly, j = col, value = as.numeric(fewsronly[[col]])) # Source 4
 setkey(fewsronly, Plant_ID)
 
+
+
 fewsronly <- setDF(fewsronly)
-fewsronly <- fewsronly[!is.nan(colMeans(fewsronly, na.rm = TRUE))] # Source 5 / remove columns with NA only
-riverrow <- rowSums(fewsronly, na.rm = TRUE) # obtain the rowSums
+fewsronly <- fewsronly[!is.nan(colMeans(fewsronly[, 2:ncol(fewsronly)], na.rm = TRUE))] # Source 5 / remove columns with NA only
+riverrow <- rowSums(fewsronly[, 2:ncol(fewsronly)], na.rm = TRUE) # obtain the rowSums
 fewsronly <- fewsronly[which(riverrow != 0), ] # subset with the rows that do not have a sum of 0 (sum of 0 means that all rows are NA due to NA being removed)
 
 fewsronly <- setDT(fewsronly)
@@ -199,7 +202,9 @@ setkey(fewsronly, Plant_ID)
 
 NAduty <- fewsronly[, grep("duty", names(fewsronly))] # find the column numbers that have duty in the column names
 
-cols <- names(fewsronly[, NAduty]) # create cols, which is the names of those column numbers from NAduty
+colnames <- NAduty
+
+cols <- names(fewsronly[, ..NAduty]) # create cols, which is the names of those column numbers from NAduty
 
 for (col in cols) fewsronly[is.na(get(col)), (col) := 0] # Source 16 / for all NAs named in cols, change the NA to 0
 
@@ -331,7 +336,7 @@ setnames(initial_rho, 2:length(initial_rho), c("\u03c1_jan (g/cm^3)", "\u03c1_fe
 heat_of_vaporization <- wt[, lapply(.SD, function(x) {
   595.9 - 0.545 * x
 }), by = key(wt)] # Source 6
-setnames(heat_of_vaporization, 2: length(heat_of_vaporization), c("L_jan (cal/g)", "L_feb (cal/g)", "L_mar (cal/g)", "L_apr (cal/g)", "L_may (cal/g)", "L_jun (cal/g)", "L_jul (cal/g)", "L_aug (cal/g)", "L_sep (cal/g)", "L_oct (cal/g)", "L_nov (cal/g)", "L_dec (cal/g)"))
+setnames(heat_of_vaporization, 2:length(heat_of_vaporization), c("L_jan (cal/g)", "L_feb (cal/g)", "L_mar (cal/g)", "L_apr (cal/g)", "L_may (cal/g)", "L_jun (cal/g)", "L_jul (cal/g)", "L_aug (cal/g)", "L_sep (cal/g)", "L_oct (cal/g)", "L_nov (cal/g)", "L_dec (cal/g)"))
 
 
 # saturation vapor pressure at water temperature
@@ -340,7 +345,7 @@ e_Tfunction <- function(x) {
     ifelse(x < 62.276, 6.107799961 + x * (0.4436518521 + x * (0.01428945805 + x * (0.0002650648471 + x * (0.000003031240396 + x * (0.00000002034080948 + x * 0.00000000006136820929))))),-296.901212123675 + 16.9015967001546 * x - 0.302242100380422 * x ^ 2 + 0.00264123776535373 * x ^ 3)}
 e_T <- wt[, lapply(.SD, function(x) ifelse(!is.na(x), e_Tfunction(x), NA_real_)), by = key(wt)]
 # Source 9 ends
-setnames(e_T, 2: length(e_T), c("e(T)_jan (mbar)", "e(T)_feb (mbar)", "e(T)_mar (mbar)", "e(T)_apr (mbar)", "e(T)_may (mbar)", "e(T)_jun (mbar)", "e(T)_jul (mbar)", "e(T)_aug (mbar)", "e(T)_sep (mbar)", "e(T)_oct (mbar)", "e(T)_nov (mbar)", "e(T)_dec (mbar)"))
+setnames(e_T, 2:length(e_T), c("e(T)_jan (mbar)", "e(T)_feb (mbar)", "e(T)_mar (mbar)", "e(T)_apr (mbar)", "e(T)_may (mbar)", "e(T)_jun (mbar)", "e(T)_jul (mbar)", "e(T)_aug (mbar)", "e(T)_sep (mbar)", "e(T)_oct (mbar)", "e(T)_nov (mbar)", "e(T)_dec (mbar)"))
 
 
 # Calculations for un-heated condition table
@@ -1249,8 +1254,11 @@ vol_heat_vaporization <- vol_heat_vaporization[, lapply(1:12, function(i) fun58(
 setnames(vol_heat_vaporization, 2:length(vol_heat_vaporization), c("Volumetric_L_jan (Btu/gal)", "Volumetric_L_feb (Btu/gal)", "Volumetric_L_mar (Btu/gal)", "Volumetric_L_apr (Btu/gal)", "Volumetric_L_may (Btu/gal)", "Volumetric_L_jun (Btu/gal)", "Volumetric_L_jul (Btu/gal)", "Volumetric_L_aug (Btu/gal)", "Volumetric_L_sep (Btu/gal)", "Volumetric_L_oct (Btu/gal)", "Volumetric_L_nov (Btu/gal)", "Volumetric_L_dec (Btu/gal)"))
 
 
+iteration9length <- c(74:length(iteration9))
+
+
 # Percent forced evaporation
-percent_forced_evap <- data.table(iteration9[, 1], iteration9[, c(38:49)], iteration9[, c(74:length(iteration9))])
+percent_forced_evap <- data.table(iteration9[, 1], iteration9[, c(38:49)], iteration9[, ..iteration9length])
 setkey(percent_forced_evap, Plant_ID)
 setnames(percent_forced_evap, 2:length(percent_forced_evap), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
@@ -1452,13 +1460,13 @@ setnames(add_evap, 2:length(add_evap), c("Added evaporation_jan (cm/month)", "Ad
 
 
 # Total heat loss increment = final deltaH
-# iteration9[, c(74:length(iteration9))]
+# iteration9[, ..iteration9length]
 
 
 # increment percent
 # Evaporative cooling as percent of added heat
 # Estimated heat loss through forced evaporation as a percentage of heat added by power plant.
-evap_cool_percent_add_heat <- data.table(addedheatload, iteration9[, c(38:49)], iteration9[, c(74:length(iteration9))])
+evap_cool_percent_add_heat <- data.table(addedheatload, iteration9[, c(38:49)], iteration9[, ..iteration9length])
 setkey(evap_cool_percent_add_heat, Plant_ID)
 setnames(evap_cool_percent_add_heat, 2:length(evap_cool_percent_add_heat), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
 # Sources 7 & 8 begin
@@ -1505,7 +1513,7 @@ setnames(evap_cool_MGD_month, 2:length(evap_cool_MGD_month), c("Evaporative cool
 
 
 ## Final Summary output section
-summary_output <- data.table(heat_water_temp_Tprime, evap_vol_per_cond_duty_MMBtu, evap_vol_per_cond_duty_MWh_thermal, heat_water, add_evap, iteration9[, c(38:49)], iteration9[, c(74:length(iteration9))], evap_cool_percent_add_heat, evap_cool_MGD_month, max_percent_change_Tprime_final_iteration, percent_change_Tprime_final_iteration)
+summary_output <- data.table(heat_water_temp_Tprime, evap_vol_per_cond_duty_MMBtu, evap_vol_per_cond_duty_MWh_thermal, heat_water, add_evap, iteration9[, c(38:49)], iteration9[, ..iteration9length], evap_cool_percent_add_heat, evap_cool_MGD_month, max_percent_change_Tprime_final_iteration, percent_change_Tprime_final_iteration)
 
 
 ## Report these as our Best Consumption Estimates
