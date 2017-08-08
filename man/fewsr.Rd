@@ -9,7 +9,7 @@ file input}
 \enumerate{
    \item r - How can I check if a file is empty? - Stack Overflow answered by Konrad Rudolph and edited by Geekuna Matata on Apr 23 2014. See \url{http://stackoverflow.com/questions/23254002/how-can-i-check-if-a-file-is-empty}.
    \item r - Better error message for stopifnot? - Stack Overflow answered by Andrie on Dec 1 2011. See \url{http://stackoverflow.com/questions/8343509/better-error-message-for-stopifnot}.
-   \item R Documentation: TclInterface {tcltk} - Low-level Tcl/Tk Interface. See \url{https://stat.ethz.ch/R-manual/R-devel/library/tcltk/html/TclInterface.html}.
+   \item RDocumentation: TclInterface {tcltk}. See \url{http://www.rdocumentation.org/packages/tcltk/versions/3.3.1/topics/TclInterface}.
    \item r - Convert column classes in data.table - Stack Overflow answered by Matt Dowle on Dec 27 2013. See \url{http://stackoverflow.com/questions/7813578/convert-column-classes-in-data-table}.
    \item r - removing columns with NA values only - Stack Overflow answered by David Arenburg on Sep 18 2014. See \url{http://stackoverflow.com/questions/25922385/removing-columns-with-na-values-only}.
    \item r - Reduce data.table by group with with different actions depending on column class? - Stack Overflow answered by Ananda Mahto on May 9 2014. See \url{http://stackoverflow.com/questions/23566343/reduce-data-table-by-group-with-with-different-actions-depending-on-column-class/23566488}.
@@ -34,13 +34,13 @@ file input}
 \usage{
 fewsr(file = tk_choose.files(default = "", caption = "Select file to open",
   multi = FALSE, filters = matrix(c("Comma-separated value file", ".csv",
-  "MS Excel spreadsheet", ".xlsx", "MS Excel 97-2003 spreadsheet", ".xls"), 6,
-  2, byrow = TRUE)), sheet = 1, type = c("lake", "pond", "river"),
-  output = c("csv", "xlsx", "both"))
+  "MS Excel spreadsheet", ".xlsx", "MS Excel 97-2003 spreadsheet", ".xls",
+  "OpenDocument Spreadsheet", ".ods"), 8, 2, byrow = TRUE)), sheet = 1,
+  type = c("lake", "pond", "river"), output = c("csv", "xlsx", "both"))
 }
 \arguments{
 \item{file}{Input file will be selected through a file dialog
-(.xlsx or .csv)}
+[.xls(x), .csv, or .ods]}
 
 \item{sheet}{Sheet number or sheet name for the input file}
 
@@ -66,24 +66,24 @@ library(FEWSR)
 # Copy and paste the following code into the R console if you
 # wish to see the input file format for the Lake plants.
 library(openxlsx)
-openXL(system.file("extdata", "FEWS_BIG_Lake_plants_input.xlsx",
-package = "FEWSR"))
+openXL(file.path(system.file("extdata", "FEWS_BIG_Lake_plants_input.xlsx",
+package = "FEWSR")))
   # opens the workbook using the default spreadsheet application
 
 
 # Copy and paste the following code into the R console if you
 # wish to see the input file format for the Pond plants.
 library(openxlsx)
-openXL(system.file("extdata", "FEWS_Pond_plants_input.xlsx",
-package = "FEWSR"))
+openXL(file.path(system.file("extdata", "FEWS_Pond_plants_input.xlsx",
+package = "FEWSR")))
   # opens the workbook using the default spreadsheet application
 
 
 # Copy and paste the following code into the R console if you
 # wish to see the input file format for the River plants.
 library(openxlsx)
-openXL(system.file("extdata", "FEWS_River_plants_input.xlsx",
-package = "FEWSR"))
+openXL(file.path(system.file("extdata", "FEWS_River_plants_input.xlsx",
+package = "FEWSR")))
   # opens the workbook using the default spreadsheet application
 
 
@@ -102,10 +102,6 @@ fewsr(sheet = 4, type = "lake", output = "both")
 # The sheet number is 4 and the surface water is lake
 }
 
-
-}
-\author{
-Irucka Embry, Timothy H. Diehl (Microsoft Excel spreadsheets)
 }
 \references{
 \enumerate{
@@ -113,4 +109,6 @@ Irucka Embry, Timothy H. Diehl (Microsoft Excel spreadsheets)
    \item Methods for estimating water consumption for thermoelectric power plants in the United States: USGS National Water Census and National Streamflow Information Program By: Timothy H. Diehl, Melissa Harris, Jennifer C. Murphy, Susan S. Hutson, and David E. Ladd, Scientific Investigations Report 2013-5188. See \url{http://pubs.er.usgs.gov/publication/sir20135188}.
 }
 }
-
+\author{
+Irucka Embry, Timothy H. Diehl (Microsoft Excel spreadsheets)
+}

@@ -9,7 +9,7 @@ interactive file input}
 \enumerate{
    \item r - How can I check if a file is empty? - Stack Overflow answered by Konrad Rudolph and edited by Geekuna Matata on Apr 23 2014. See \url{http://stackoverflow.com/questions/23254002/how-can-i-check-if-a-file-is-empty}.
    \item r - Better error message for stopifnot? - Stack Overflow answered by Andrie on Dec 1 2011. See \url{http://stackoverflow.com/questions/8343509/better-error-message-for-stopifnot}.
-   \item R Documentation: TclInterface {tcltk} - Low-level Tcl/Tk Interface. See \url{https://stat.ethz.ch/R-manual/R-devel/library/tcltk/html/TclInterface.html}.
+   \item RDocumentation: TclInterface {tcltk}. See \url{http://www.rdocumentation.org/packages/tcltk/versions/3.3.1/topics/TclInterface}.
    \item r - Convert column classes in data.table - Stack Overflow answered by Matt Dowle on Dec 27 2013. See \url{http://stackoverflow.com/questions/7813578/convert-column-classes-in-data-table}.
    \item r - removing columns with NA values only - Stack Overflow answered by David Arenburg on Sep 18 2014. See \url{http://stackoverflow.com/questions/25922385/removing-columns-with-na-values-only}.
    \item r - Reduce data.table by group with with different actions depending on column class? - Stack Overflow answered by Ananda Mahto on May 9 2014. See \url{http://stackoverflow.com/questions/23566343/reduce-data-table-by-group-with-with-different-actions-depending-on-column-class/23566488}.
@@ -100,13 +100,12 @@ package = "FEWSR"), type = "lake", output = "both")
 
 
 }
-\author{
-Irucka Embry, Timothy H. Diehl (Microsoft Excel spreadsheets)
-}
 \references{
 \enumerate{
    \item Withdrawal and consumption of water by thermoelectric power plants in the United States, 2010: A product of the USGS National Water Census and the USGS National Streamflow Information Program By: Timothy H. Diehl and Melissa A. Harris, Scientific Investigations Report 2014-5184. See \url{http://pubs.er.usgs.gov/publication/sir20145184}.
    \item Methods for estimating water consumption for thermoelectric power plants in the United States: USGS National Water Census and National Streamflow Information Program By: Timothy H. Diehl, Melissa Harris, Jennifer C. Murphy, Susan S. Hutson, and David E. Ladd, Scientific Investigations Report 2013-5188. See \url{http://pubs.er.usgs.gov/publication/sir20135188}.
 }
 }
-
+\author{
+Irucka Embry, Timothy H. Diehl (Microsoft Excel spreadsheets)
+}
