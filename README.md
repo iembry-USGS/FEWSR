@@ -11,9 +11,17 @@ install.packages("FEWSR")
 ```
 
 
+# Development version installation
+```R
+devtools::install_github("iembry-USGS/FEWSR", build_vignettes = TRUE)
+```
+
+
 # Examples
 
 ```R
+# interactive FEWSR version examples
+
 library(FEWSR)
 fewsr(sheet = "Input", type = "pond", output = "csv")
 # The sheet name is "Input" and the surface water is pond

@@ -9,7 +9,7 @@ file input}
 \enumerate{
    \item r - How can I check if a file is empty? - Stack Overflow answered by Konrad Rudolph and edited by Geekuna Matata on Apr 23 2014. See \url{http://stackoverflow.com/questions/23254002/how-can-i-check-if-a-file-is-empty}.
    \item r - Better error message for stopifnot? - Stack Overflow answered by Andrie on Dec 1 2011. See \url{http://stackoverflow.com/questions/8343509/better-error-message-for-stopifnot}.
-   \item inside-R: TclInterface {tcltk}. See \url{http://www.inside-r.org/r-doc/tcltk/.Tcl}.
+   \item R Documentation: TclInterface {tcltk} - Low-level Tcl/Tk Interface. See \url{https://stat.ethz.ch/R-manual/R-devel/library/tcltk/html/TclInterface.html}.
    \item r - Convert column classes in data.table - Stack Overflow answered by Matt Dowle on Dec 27 2013. See \url{http://stackoverflow.com/questions/7813578/convert-column-classes-in-data-table}.
    \item r - removing columns with NA values only - Stack Overflow answered by David Arenburg on Sep 18 2014. See \url{http://stackoverflow.com/questions/25922385/removing-columns-with-na-values-only}.
    \item r - Reduce data.table by group with with different actions depending on column class? - Stack Overflow answered by Ananda Mahto on May 9 2014. See \url{http://stackoverflow.com/questions/23566343/reduce-data-table-by-group-with-with-different-actions-depending-on-column-class/23566488}.

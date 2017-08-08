@@ -19,8 +19,7 @@ vignette: >
 ```{r eval = FALSE}
 # Example to check the input file format
 library(install.load)
-load_package("FEWSR", "openxlsx")
-# load needed packages using the load_package function from the install.load package (it is assumed that you have already installed these packages)
+load_package("FEWSR", "openxlsx") # load needed packages using the load_package function from the install.load package (it is assumed that you have already installed these packages)
 
 
 # Copy and paste the following code into the R console if you wish to see the input file format for the Lake plants.
