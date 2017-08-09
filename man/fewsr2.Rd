@@ -34,7 +34,8 @@ fewsr2(file, sheet = 1, type = c("lake", "pond", "river"),
   output = c("csv", "xlsx", "both"))
 }
 \arguments{
-\item{file}{Input file (.xlsx or .csv)}
+\item{file}{Input file will be selected through a file dialog
+[.xls(x), .csv, or .ods]}
 
 \item{sheet}{Sheet number or sheet name for the input file}
 
@@ -54,47 +55,47 @@ Multiplant Lake/Pond/River Version 3.104 - 2012/12/15
 }
 \examples{
 \dontrun{
-library(FEWSR)
+library("FEWSR")
 # Examples to check the input file format
 
 # Copy and paste the following code into the R console if you
 # wish to see the input file format for the Lake plants.
-library(openxlsx)
-openXL(system.file("extdata", "FEWS_BIG_Lake_plants_input.xlsx",
-package = "FEWSR"))
+library("openxlsx")
+openXL(file.path(file.path(system.file("extdata", "FEWS_BIG_Lake_plants_input.xlsx",
+package = "FEWSR")))
   # opens the workbook using the default spreadsheet application
 
 
 # Copy and paste the following code into the R console if you
 # wish to see the input file format for the Pond plants.
-library(openxlsx)
-openXL(system.file("extdata", "FEWS_Pond_plants_input.xlsx",
-package = "FEWSR"))
+library("openxlsx")
+openXL(file.path(file.path(system.file("extdata", "FEWS_Pond_plants_input.xlsx",
+package = "FEWSR")))
   # opens the workbook using the default spreadsheet application
 
 
 # Copy and paste the following code into the R console if you
 # wish to see the input file format for the River plants.
-library(openxlsx)
-openXL(system.file("extdata", "FEWS_River_plants_input.xlsx",
-package = "FEWSR"))
+library("openxlsx")
+openXL(file.path(file.path(system.file("extdata", "FEWS_River_plants_input.xlsx",
+package = "FEWSR")))
   # opens the workbook using the default spreadsheet application
 
 
 
 # Examples to show different use cases
-fewsr2(system.file("extdata", "FEWS_Pond_plants_input.xlsx",
-package = "FEWSR"), type = "pond", output = "csv")
+fewsr2(file.path(system.file("extdata", "FEWS_Pond_plants_input.xlsx",
+package = "FEWSR"), type = "pond", output = "csv"))
 # The sheet number is 1 (default) and the surface water is pond
 
 
-fewsr2(system.file("extdata", "FEWS_River_plants_input.xlsx",
-package = "FEWSR"), type = "river", output = "xlsx"
+fewsr2(file.path(system.file("extdata", "FEWS_River_plants_input.xlsx",
+package = "FEWSR"), type = "river", output = "xlsx"))
 # The sheet number is 1 (default) and the surface water is river
 
 
-fewsr2(system.file("extdata", "FEWS_BIG_Lake_plants_input.xlsx",
-package = "FEWSR"), type = "lake", output = "both")
+fewsr2(file.path(system.file("extdata", "FEWS_BIG_Lake_plants_input.xlsx",
+package = "FEWSR"), type = "lake", output = "both"))
 # The sheet number is 1 (default) and the surface water is lake
 }
 

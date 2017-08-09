@@ -3,17 +3,17 @@
 R package that contains the FEWS river, lake, and pond models used to obtain the evapotranspiration from surface waters in power plants.
 
 
-
-# Installation
-
-```R
-install.packages("FEWSR")
-```
-
-
 # Development version installation
 ```R
 devtools::install_github("iembry-USGS/FEWSR", build_vignettes = TRUE)
+```
+
+
+
+# CRAN Installation (once it is available on CRAN)
+
+```R
+install.packages("FEWSR")
 ```
 
 
@@ -22,7 +22,8 @@ devtools::install_github("iembry-USGS/FEWSR", build_vignettes = TRUE)
 ```R
 # interactive FEWSR version examples
 
-library(FEWSR)
+library("FEWSR")
+
 fewsr(sheet = "Input", type = "pond", output = "csv")
 # The sheet name is "Input" and the surface water is pond
 

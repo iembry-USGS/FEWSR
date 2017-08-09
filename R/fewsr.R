@@ -648,6 +648,7 @@ T4a <- T4[, lapply(1:12, function(i) ifelse(!is.na(c(get(paste0('a', i)), get(pa
 # Source 7 - 9 ends
 T4 <- T4a[pmatch(T4$Plant_ID, T4a$Plant_ID), ]
 setnames(T4, 2:length(T4), c("T4_jan ()", "T4_feb ()", "T4_mar ()", "T4_apr ()", "T4_may ()", "T4_jun ()", "T4_jul ()", "T4_aug ()", "T4_sep ()", "T4_oct ()", "T4_nov ()", "T4_dec ()"))
+setkey(T4, Plant_ID)
 
 
 # Percent change in T' from previous iteration1
@@ -742,6 +743,7 @@ T5a <- T5[, lapply(1:12, function(i) ifelse(!is.na(c(get(paste0('a', i)), get(pa
 # Source 7 - 9 ends
 T5 <- T5a[pmatch(T5$Plant_ID, T5a$Plant_ID), ]
 setnames(T5, 2:length(T5), c("T5_jan ()", "T5_feb ()", "T5_mar ()", "T5_apr ()", "T5_may ()", "T5_jun ()", "T5_jul ()", "T5_aug ()", "T5_sep ()", "T5_oct ()", "T5_nov ()", "T5_dec ()"))
+setkey(T5, Plant_ID)
 
 
 # Percent change in T' from previous iteration1
@@ -837,6 +839,7 @@ T6a <- T6[, lapply(1:12, function(i) ifelse(!is.na(c(get(paste0('a', i)), get(pa
 # Source 7 - 9 ends
 T6 <- T6a[pmatch(T6$Plant_ID, T6a$Plant_ID), ]
 setnames(T6, 2:length(T6), c("T6_jan ()", "T6_feb ()", "T6_mar ()", "T6_apr ()", "T6_may ()", "T6_jun ()", "T6_jul ()", "T6_aug ()", "T6_sep ()", "T6_oct ()", "T6_nov ()", "T6_dec ()"))
+setkey(T6, Plant_ID)
 
 
 # Percent change in T' from previous iteration1
@@ -931,6 +934,7 @@ T7a <- T7[, lapply(1:12, function(i) ifelse(!is.na(c(get(paste0('a', i)), get(pa
 # Source 7 - 9 ends
 T7 <- T7a[pmatch(T7$Plant_ID, T7a$Plant_ID), ]
 setnames(T7, 2:length(T7), c("T7_jan ()", "T7_feb ()", "T7_mar ()", "T7_apr ()", "T7_may ()", "T7_jun ()", "T7_jul ()", "T7_aug ()", "T7_sep ()", "T7_oct ()", "T7_nov ()", "T7_dec ()"))
+setkey(T7, Plant_ID)
 
 
 # Percent change in T' from previous iteration1
@@ -1027,6 +1031,7 @@ T8a <- T8[, lapply(1:12, function(i) ifelse(!is.na(c(get(paste0('a', i)), get(pa
 # Source 7 - 9 ends
 T8 <- T8a[pmatch(T8$Plant_ID, T8a$Plant_ID), ]
 setnames(T8, 2:length(T8), c("T8_jan ()", "T8_feb ()", "T8_mar ()", "T8_apr ()", "T8_may ()", "T8_jun ()", "T8_jul ()", "T8_aug ()", "T8_sep ()", "T8_oct ()", "T8_nov ()", "T8_dec ()"))
+setkey(T8, Plant_ID)
 
 
 # Percent change in T' from previous iteration1
@@ -1123,6 +1128,7 @@ T9a <- T9[, lapply(1:12, function(i) ifelse(!is.na(c(get(paste0('a', i)), get(pa
 # Source 7 - 9 ends
 T9 <- T9a[pmatch(T9$Plant_ID, T9a$Plant_ID), ]
 setnames(T9, 2:length(T9), c("T9_jan ()", "T9_feb ()", "T9_mar ()", "T9_apr ()", "T9_may ()", "T9_jun ()", "T9_jul ()", "T9_aug ()", "T9_sep ()", "T9_oct ()", "T9_nov ()", "T9_dec ()"))
+setkey(T9, Plant_ID)
 
 
 # Percent change in T' from previous iteration1
