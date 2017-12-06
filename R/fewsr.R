@@ -142,7 +142,8 @@ if (file.info(file)$size == 0) {
 
 
 # no visible binding for global variable NOTE
-Plant_ID <- a <- b <- Month <- Percent <- ..NAduty <- ..iteration9length <- NULL # Source 19
+if(getRversion() >= "2.15.1")  utils::globalVariables(c("Plant_ID", "a", "b", "Month", "Percent", "..NAduty", "..iteration9length")) # Source 19
+
 
 
 fewsronly <- import(file, which = sheet)
