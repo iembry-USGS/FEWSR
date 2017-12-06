@@ -36,7 +36,7 @@
 #'    \item r - operations (+, -, /, *) on unequal-sized data.table - Stack Overflow asked and answered by iembry on Jul 24 2014 and Aug 14 2014, respectively. See \url{http://stackoverflow.com/questions/24940246/operations-on-unequal-sized-data-table}.
 #'    \item R data.table operations with multiple groups in single data.table and outside function with lapply - Stack Overflow answered by eddi on Aug 12 2014. See \url{https://stackoverflow.com/questions/25273767/r-data-table-operations-with-multiple-groups-in-single-data-table-and-outside-fu}.
 #'    \item r - ifelse data.table multiplication while keeping NA values as real - Stack Overflow answered by Mike.Gahan on Jul 25 2014. See \url{http://stackoverflow.com/questions/24965620/ifelse-data-table-multiplication-while-keeping-na-values-as-real}.
-#'    \item How do I replace NA values with zeros in R? - Stack Overflow answered by aL3xa on Nov 17 2011. See \url{http://stackoverflow.com/questions/8161836/how-do-i-replace-na-values-with-zeros-in-r/8166616}.
+#'    \item r - How to replace NA values in a table *for selected columns*? data.frame, data.table - Stack Overflow edited BY eddi on Jan 19 2016 on Nov 17 2011. See \url{https://stackoverflow.com/questions/19379081/how-to-replace-na-values-in-a-table-for-selected-columns-data-frame-data-tab}.
 #'    \item r - Summing across rows of a data.table for specifc columns - Stack Overflow answered by eddi on Feb 18 2014. See \url{http://stackoverflow.com/questions/21857679/summing-across-rows-of-a-data-table-for-specifc-columns/21859095}.
 #'    \item r - Sum multiple columns - Stack Overflow answered by eddi on Jul 1 2013. See \url{http://stackoverflow.com/questions/17407506/sum-multiple-columns}.
 #'    \item R summarizing multiple columns with data.table - Stack Overflow answered by Ricardo Saporta on May 13 2013. See \url{http://stackoverflow.com/questions/16513827/r-summarizing-multiple-columns-with-data-table/16513949}.
@@ -49,6 +49,7 @@
 #'    \item How to check file extensions in R - Stack Overflow answered by lebatsnok on May 17 2014. See \url{http://stackoverflow.com/questions/23713284/how-to-check-file-extensions-in-r}.
 #'    \item multiple output filenames in R - Stack Overflow asked and edited by Gabelins on Feb 1 2013. See \url{http://stackoverflow.com/questions/14651594/multiple-output-filenames-in-r}.
 #'    \item r - Regex return file name, remove path and file extension - Stack Overflow answered and edited by Ananda Mahto on Feb 25 20134. See \url{http://stackoverflow.com/questions/15073753/regex-return-file-name-remove-path-and-file-extension/15073919}.
+#'    \item r - Order data frame rows according to vector with specific order - Stack Overflow answered and edited by Edward on Aug 15 2012. See \url{https://stackoverflow.com/questions/11977102/order-data-frame-rows-according-to-vector-with-specific-order}.
 #' }
 #'
 #' @encoding UTF-8
@@ -101,6 +102,7 @@
 #' @import rio
 #' @import readxl
 #' @import openxlsx
+#' @import readODS
 #' @import ggplot2
 #' @import tcltk
 #' @import gWidgets2
@@ -135,9 +137,12 @@ if (file.info(file)$size == 0) {
 
   } else {
 
+
 # Input provides the following parameters: Plant ID, Elevation (feet), Pond Area (acres), Added heat load (MMBtu) Jan - Dec, Dry bulb air temperature Ta (deg C) Jan - Dec, Wet bulb air temperature Twb (deg C) Jan - Dec, Natural water temperature T (deg C) Jan - Dec, Wind speed at 2m W (mph) Jan - Dec.
 
-Plant_ID <- a <- b <- Month <- Percent <- NULL # Source 19
+
+# no visible binding for global variable NOTE
+Plant_ID <- a <- b <- Month <- Percent <- ..NAduty <- ..iteration9length <- NULL # Source 19
 
 
 fewsronly <- import(file, which = sheet)
@@ -162,7 +167,13 @@ for (col in change_class) set(inputwind, j = col, value = as.numeric(inputwind[[
 ## Return to fewsronly
 
 fewsronly <- fewsronly[!1:5, ] # remove rows 1:5
+
 setnames(fewsronly, 1, "Plant_ID")
+
+check <- copy(fewsronly)
+
+order_check <- check$"Plant_ID"
+
 setkey(fewsronly, Plant_ID)
 
 
@@ -202,11 +213,10 @@ setkey(fewsronly, Plant_ID)
 
 NAduty <- fewsronly[, grep("duty", names(fewsronly))] # find the column numbers that have duty in the column names
 
-colnames <- NAduty
-
 cols <- names(fewsronly[, ..NAduty]) # create cols, which is the names of those column numbers from NAduty
 
-for (col in cols) fewsronly[is.na(get(col)), (col) := 0] # Source 16 / for all NAs named in cols, change the NA to 0
+for (col in cols) set(fewsronly, which(is.na(fewsronly[[col]])), col, 0) # Source 16 / for all NAs named in cols, change the NA to 0
+
 
 
 ## Other Input values
@@ -1872,6 +1882,25 @@ total_consumption_MG <- total_MGD_consumpt
 
 # total withdrawal MGD
 total_withdrawal_MGD <- mean_MGD_year1_withdr2
+
+
+# collect all objects to ensure that the order of Plant_ID matches what was available in the beginning
+evap_cool_MGD_month <- evap_cool_MGD_month[match(order_check, evap_cool_MGD_month$Plant_ID)] # Source 23
+
+max_consumpt_cushion <- max_consumpt_cushion[match(order_check, max_consumpt_cushion$Plant_ID)] # Source 23
+
+min_consumpt_cushion <- min_consumpt_cushion[match(order_check, min_consumpt_cushion$Plant_ID)] # Source 23
+
+est_MGD_withdrawal <- est_MGD_withdrawal[match(order_check, est_MGD_withdrawal$Plant_ID)] # Source 23
+
+est_max_MGD_withdrawal <- est_max_MGD_withdrawal[match(order_check, est_max_MGD_withdrawal$Plant_ID)] # Source 23
+
+est_min_MGD_withdrawal <- est_min_MGD_withdrawal[match(order_check, est_min_MGD_withdrawal$Plant_ID)] # Source 23
+
+max_withdr_cushion <- max_withdr_cushion[match(order_check, max_withdr_cushion$Plant_ID)] # Source 23
+
+min_withdr_cushion <- min_withdr_cushion[match(order_check, min_withdr_cushion$Plant_ID)] # Source 23
+
 
 
 ## output of results
