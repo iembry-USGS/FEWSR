@@ -159,7 +159,7 @@ Plant_ID <- a <- b <- Month <- Percent <- ..NAduty <- ..iteration9length <- NULL
 # defined in SDenv and can be used by users.
 
 
-fewsronly <- import(file, which = sheet)
+fewsronly <- import(file, which = sheet, na.strings = c("NA", "N/A", "#N/A", "-"))
 fewsronly <- setDT(fewsronly)
 
 ## Input values
