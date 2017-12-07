@@ -142,7 +142,21 @@ if (file.info(file)$size == 0) {
 
 
 # no visible binding for global variable NOTE
-if(getRversion() >= "2.15.1")  utils::globalVariables(names = c("Plant_ID", "a", "b", "Month", "Percent", "..NAduty", "..iteration9length"), package = "FEWSR", add = FALSE) # Source 19
+ # Source 19
+..global <- new.env() # thanks to: http://stackoverflow.com/a/12605694/403310
+
+setPackageName("FEWSR", .global)
+
+..global$print = ""
+
+Plant_ID <- a <- b <- Month <- Percent <- ..NAduty <- ..iteration9length <- NULL
+
+# These are exported to prevent NOTEs from R CMD check, and checkUsage via compiler.
+# But also exporting them makes it clear (to users and other packages) that data.table uses these as symbols.
+# And NULL makes it clear (to the R's mask check on loading) that they're variables not functions.
+# utils::globalVariables(c(".SD",".N")) was tried as well, but exporting seems better.
+# So even though .BY doesn't appear in this file, it should still be NULL here and exported because it's
+# defined in SDenv and can be used by users.
 
 
 fewsronly <- import(file, which = sheet)
