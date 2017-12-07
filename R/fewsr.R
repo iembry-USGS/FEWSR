@@ -143,11 +143,11 @@ if (file.info(file)$size == 0) {
 
 # no visible binding for global variable NOTE
  # Source 19
-..global <- new.env() # thanks to: http://stackoverflow.com/a/12605694/403310
+.global <- new.env() # thanks to: http://stackoverflow.com/a/12605694/403310
 
 setPackageName("FEWSR", .global)
 
-..global$print = ""
+.global$print = ""
 
 Plant_ID <- a <- b <- Month <- Percent <- ..NAduty <- ..iteration9length <- NULL
 
