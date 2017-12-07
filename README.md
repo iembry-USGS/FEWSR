@@ -5,6 +5,12 @@ R package that contains the FEWS river, lake, and pond models used to obtain the
 
 # Development version installation
 ```R
+if (requireNamespace("devtools")) {
+
+install.packages("devtools")
+
+}
+
 devtools::install_github("iembry-USGS/FEWSR", build_vignettes = TRUE)
 ```
 

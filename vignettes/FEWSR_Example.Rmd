@@ -18,12 +18,7 @@ vignette: >
 # Examples
 ```{r eval = FALSE}
 # Example to check the input file format
-install.packages("install.load") # required for the next line of code
-
-
-install.load::load_package("FEWSR", "openxlsx")
-# load needed packages using the load_package function from the install.load package (it is assumed that you have already installed these packages)
-
+library("FEWSR")
 
 # Copy and paste the following code into the R console if you wish to see the input file format for the Lake plants.
 openXL(file.path(system.file("extdata", "FEWS_BIG_Lake_plants_input.xlsx", package = "FEWSR")))
