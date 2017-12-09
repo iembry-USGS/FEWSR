@@ -110,6 +110,7 @@
 #' @import data.table
 #' @import grDevices
 #' @import utils
+#' @import fastmatch
 #'
 #' @export
 fewsr <- function (file = tk_choose.files(default = "", caption = "Select file to open", multi = FALSE, filters = matrix(c("Comma-separated value file", ".csv", "MS Excel spreadsheet", ".xlsx", "MS Excel 97-2003 spreadsheet", ".xls", "OpenDocument Spreadsheet", ".ods"), 8, 2, byrow = TRUE)), sheet = 1, type = c("lake", "pond", "river"), output  = c("csv", "xlsx", "both")) {
@@ -159,8 +160,9 @@ Plant_ID <- a <- b <- Month <- Percent <- ..NAduty <- ..iteration9length <- NULL
 # defined in SDenv and can be used by users.
 
 
-fewsronly <- import(file, which = sheet, na.strings = c("NA", "N/A", "#N/A", "-"))
+fewsronly <- import(file, which = sheet, na.strings = c("NA", "-"))
 fewsronly <- setDT(fewsronly)
+
 
 ## Input values
 minheatload <- as.numeric(fewsronly[3, 1][[1]])
@@ -188,21 +190,38 @@ check <- copy(fewsronly)
 
 order_check <- check$"Plant_ID"
 
-setkeyv(fewsronly, "Plant_ID")
+setkey(fewsronly, Plant_ID)
+
 
 
 # changing column to character class
 # obtain the name of the column based on the column number
 change_class1 <- "Plant_ID"
 for (col in change_class1) set(fewsronly, j = col, value = as.character(fewsronly[[col]])) # Source 4
-setkeyv(fewsronly, "Plant_ID")
+setkey(fewsronly, Plant_ID)
+
+
+# change all columns to character class
+# obtain the name of the column based on the column number
+change_class2 <- names(df[, 2:ncol(df)]) # name of all columns except column 1
+for (col in change_class2) set(df, j = col, value = as.character(df[[col]])) # Source 4
+
+
+# change all possible stored values for NA to R's NA
+for (col in change_class2) set(df, i = which(df[[col]] %fin% c("na", "NA", "N/A", "#N/A", "-", "")), j = col, value = NA_character_) # Source 4
+
+
+# trim all white space surrounding numbers
+for (col in change_class2) set(df, j = col, value = stri_trim_both(df[[col]], pattern = "\\P{Wspace}")) # Source 4
+
+
+# replace all commas with nothing
+for (col in change_class2) set(df, j = col, value = stri_replace_all_fixed(df[[col]], ",", ""))
 
 
 # changing columns to numeric class
-# obtain the name of the column based on the column number
-change_class2 <- names(fewsronly[, 2:ncol(fewsronly)]) # name of all columns except column 1
 for (col in change_class2) set(fewsronly, j = col, value = as.numeric(fewsronly[[col]])) # Source 4
-setkeyv(fewsronly, "Plant_ID")
+setkey(fewsronly, Plant_ID)
 
 
 
@@ -212,7 +231,7 @@ riverrow <- rowSums(fewsronly[, 2:ncol(fewsronly)], na.rm = TRUE) # obtain the r
 fewsronly <- fewsronly[which(riverrow != 0), ] # subset with the rows that do not have a sum of 0 (sum of 0 means that all rows are NA due to NA being removed)
 
 fewsronly <- setDT(fewsronly)
-setkeyv(fewsronly, "Plant_ID")
+setkey(fewsronly, Plant_ID)
 
 setnames(fewsronly, c("Plant_ID", "Elevation above sea level, feet", "Pond Area (acres)", "duty_jan (MMBtu)", "duty_feb (MMBtu)", "duty_mar (MMBtu)", "duty_apr (MMBtu)",	"duty_may (MMBtu)", "duty_jun (MMBtu)",	"duty_jul (MMBtu)", "duty_aug (MMBtu)",	"duty_sep (MMBtu)", "duty_oct (MMBtu)",	"duty_nov (MMBtu)", "duty_dec (MMBtu)",	"db_jan (deg C)", "db_feb (deg C)", "db_mar (deg C)", "db_apr (deg C)", "db_may (deg C)", "db_jun (deg C)", "db_jul (deg C)", "db_aug (deg C)", "db_sep (deg C)", "db_oct (deg C)", "db_nov (deg C)", "db_dec (deg C)", "wb_jan (deg C)", "wb_feb (deg C)", "wb_mar (deg C)", "wb_apr (deg C)", "wb_may (deg C)", "wb_jun (deg C)", "wb_jul (deg C)", "wb_aug (deg C)", "wb_sep (deg C)", "wb_oct (deg C)", "wb_nov (deg C)", "wb_dec (deg C)", "wt_jan (deg C)", "wt_feb (deg C)", "wt_mar (deg C)", "wt_apr (deg C)", "wt_may (deg C)", "wt_jun (deg C)", "wt_jul (deg C)", "wt_aug (deg C)", "wt_sep (deg C)", "wt_oct (deg C)", "wt_nov (deg C)", "wt_dec (deg C)", "ws_jan (mph)", "ws_feb (mph)", "ws_mar (mph)", "ws_apr (mph)", "ws_may (mph)", "ws_jun (mph)", "ws_jul (mph)", "ws_aug (mph)", "ws_sep (mph)", "ws_oct (mph)", "ws_nov (mph)", "ws_dec (mph)")) # set column names
 
@@ -223,7 +242,7 @@ set(fewsronly, j = "Pressure", value = ((44331.514 - fewsronly$elevation) / 1188
 
 setnames(fewsronly, 64:65, c("Elevation above sea level, meters", "Pressure, mbar")) # set the column names
 setcolorder(fewsronly, c(1:2, 64:65, 3:63)) # rearrange the columns
-setkeyv(fewsronly, "Plant_ID")
+setkey(fewsronly, Plant_ID)
 
 NAduty <- fewsronly[, grep("duty", names(fewsronly))] # find the column numbers that have duty in the column names
 
@@ -287,7 +306,7 @@ pond[, paste0("Pond Area (acres)", 2:12) := rep(pond[, 2], 11)]
 addedheatload <- data.table(duty, pond, monthdays)
 addedheatload[, 14 := NULL]
 setnames(addedheatload, 2:length(addedheatload), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
-setkeyv(addedheatload, "Plant_ID")
+setkey(addedheatload, Plant_ID)
 # Sources 7 & 8 begin
 fun1 <- function(a, b, c) { ifelse(a / (3.412 * c * 24 * b) > 0, max(a / (3.412 * c * 24 * b), minheatload), 0)
 }
@@ -319,7 +338,7 @@ fewsronly2[, paste0("Pressure, mbar", 2:12) := rep(fewsronly2[, 2], 11)]
 ea <- data.table(e_Twb, db, wb, fewsronly2)
 ea[, c(14, 27, 40) := NULL]
 setnames(ea, 2:length(ea), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12"))
-setkeyv(ea, "Plant_ID")
+setkey(ea, Plant_ID)
 # Sources 7 & 8 begin
 fun2 <- function(a, b, c, d) a - d * (b - c) * 0.00066 * (1 + 0.00115 * c)
 
@@ -375,13 +394,13 @@ setnames(e_T, 2:length(e_T), c("e(T)_jan (mbar)", "e(T)_feb (mbar)", "e(T)_mar (
 # Calculations for un-heated condition table
 calc_unheated_condition <- data.table(e_Twb, ea, windspeed, f_W_mm, f_W_cm, initial_rho, heat_of_vaporization, e_T)
 calc_unheated_condition[, c(14, 27, 40, 53, 66, 79, 92) := NULL]
-setkeyv(calc_unheated_condition, "Plant_ID")
+setkey(calc_unheated_condition, Plant_ID)
 
 
 # initial estimated ratio of delta T to heat loading
 deltaT_heat_loading_ratio_initial <- data.table(wt, ws, addedheatload)
 deltaT_heat_loading_ratio_initial[, c(14, 27) := NULL]
-setkeyv(deltaT_heat_loading_ratio_initial, "Plant_ID")
+setkey(deltaT_heat_loading_ratio_initial, Plant_ID)
 setnames(deltaT_heat_loading_ratio_initial, 2:length(deltaT_heat_loading_ratio_initial), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
 # Sources 7 & 8 begin
 fun3 <- function(a, b, c) (averagedcoefficients$coefficient[1] + averagedcoefficients$coefficient[2] * a + averagedcoefficients$coefficient[3] * b + averagedcoefficients$coefficient[4] * c + averagedcoefficients$coefficient[5] * a ^ 2 + averagedcoefficients$coefficient[6] * b ^ 2 + averagedcoefficients$coefficient[7] * c ^ 2)
@@ -394,7 +413,7 @@ setnames(deltaT_heat_loading_ratio_initial, 2:length(deltaT_heat_loading_ratio_i
 # Initial guess at T' / T1
 T1 <- data.table(wt, deltaT_heat_loading_ratio_initial, deltaHf)
 T1[, c(14, 27) := NULL]
-setkeyv(T1, "Plant_ID")
+setkey(T1, Plant_ID)
 setnames(T1, 2:length(T1), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
 # Sources 7 & 8 begin
 fun4 <- function(a, b, c) pmin(99, a + b * c)
@@ -417,7 +436,7 @@ setnames(eTprime1, 2:length(eTprime1), c("e(T')1_jan ()", "e(T')1_feb ()", "e(T'
 # deltaE1
 deltaE1 <- data.table(f_W_cm, initial_rho, heat_of_vaporization, e_T, eTprime1)
 deltaE1[, c(14, 27, 40, 53) := NULL]
-setkeyv(deltaE1, "Plant_ID")
+setkey(deltaE1, Plant_ID)
 setnames(deltaE1, 2:length(deltaE1), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
 # Sources 7 & 8 begin
 fun5 <- function(a, b, c, d, e) b * c * a * (e - d)
@@ -431,7 +450,7 @@ setnames(deltaE1, 2:length(deltaE1), c("deltaE1_jan (cal/(cm^2 sec))", "deltaE1_
 deltaC1 <- data.table(f_W_cm, initial_rho, T1, wt, fewsronly2)
 deltaC1[, c(14, 27, 40, 53) := NULL]
 setnames(deltaC1, 2:length(deltaC1), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
-setkeyv(deltaC1, "Plant_ID")
+setkey(deltaC1, Plant_ID)
 # Sources 7 & 8 begin
 fun6 <- function(a, b, c, d, e) a * ((b * e * constants$constants[9]) / constants$constants[10]) * (c - d)
 
@@ -443,7 +462,7 @@ setnames(deltaC1, 2:length(deltaC1), c("deltaC1_jan (cal/(cm^2 sec))", "deltaC1_
 # deltaR1
 deltaR1 <- data.table(T1, wt)
 deltaR1[, 14 := NULL]
-setkeyv(deltaR1, "Plant_ID")
+setkey(deltaR1, Plant_ID)
 setnames(deltaR1, 2:length(deltaR1), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun7 <- function(a, b) (constants$constants[7] * constants$constants[8] / constants$constants[12]) * ((a + Kelvin) ^ 4 - (b + Kelvin) ^ 4)
@@ -456,7 +475,7 @@ setnames(deltaR1, 2:length(deltaR1), c("deltaR1_jan (cal/(cm^2 sec))", "deltaR1_
 # Increment in total heat loss deltaH / deltaH1
 deltaH1 <- data.table(deltaE1, deltaC1, deltaR1)
 deltaH1[, c(14, 27) := NULL]
-setkeyv(deltaH1, "Plant_ID")
+setkey(deltaH1, Plant_ID)
 setnames(deltaH1 , 2:length(deltaH1), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
 # Sources 7 & 8 begin
 fun8 <- function(a, b, c) a + b + c
@@ -476,7 +495,7 @@ iteration1[, c(14, 27, 40, 53, 66) := NULL]
 T2 <- data.table(wt, T1, deltaH1, deltaHf)
 T2[, c(14, 27, 40) := NULL]
 setnames(T2, 2:length(T2), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12"))
-setkeyv(T2, "Plant_ID")
+setkey(T2, Plant_ID)
 # Sources 7 & 8 begin
 fun9 <- function(a, b, c, d) { (a + (b - a) * (d / c))
 }
@@ -489,7 +508,7 @@ setnames(T2, 2:length(T2), c("T2_jan ()", "T2_feb ()", "T2_mar ()", "T2_apr ()",
 # Percent change in T' from previous iteration1
 percentchangeTprime1 <- data.table(T1, T2)
 percentchangeTprime1[, 14 := NULL]
-setkeyv(percentchangeTprime1, "Plant_ID")
+setkey(percentchangeTprime1, Plant_ID)
 setnames(percentchangeTprime1 , 2:length(percentchangeTprime1), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun10 <- function(a, b) ((b - a) / a) * 100
@@ -511,7 +530,7 @@ setnames(eTprime2, 2:length(eTprime2), c("e(T')2_jan ()", "e(T')2_feb ()", "e(T'
 # deltaE2 / deltaE2
 deltaE2 <- data.table(f_W_cm, initial_rho, heat_of_vaporization, e_T, eTprime2)
 deltaE2[, c(14, 27, 40, 53) := NULL]
-setkeyv(deltaE2, "Plant_ID")
+setkey(deltaE2, Plant_ID)
 setnames(deltaE2, 2:length(deltaE2), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
 # Sources 7 & 8 begin
 fun11 <- function(a, b, c, d, e) b * c * a * (e - d)
@@ -525,7 +544,7 @@ setnames(deltaE2, 2:length(deltaE2), c("deltaE2_jan (cal/(cm^2 sec))", "deltaE2_
 deltaC2 <- data.table(f_W_cm, initial_rho, T2, wt, fewsronly2)
 deltaC2[, c(14, 27, 40, 53) := NULL]
 setnames(deltaC2, 2:length(deltaC2), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
-setkeyv(deltaC2, "Plant_ID")
+setkey(deltaC2, Plant_ID)
 # Sources 7 & 8 begin
 fun12 <- function(a, b, c, d, e) a * ((b * e * constants$constants[9]) / constants$constants[10]) * (c - d)
 
@@ -537,7 +556,7 @@ setnames(deltaC2, 2:length(deltaC2), c("deltaC2_jan (cal/(cm^2 sec))", "deltaC2_
 # deltaR2 / deltaR2
 deltaR2 <- data.table(T2, wt)
 deltaR2[, 14 := NULL]
-setkeyv(deltaR2, "Plant_ID")
+setkey(deltaR2, Plant_ID)
 setnames(deltaR2, 2:length(deltaR2), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun13 <- function(a, b) (constants$constants[7] * constants$constants[8] / constants$constants[12]) * ((a + Kelvin) ^ 4 - (b + Kelvin) ^ 4)
@@ -550,7 +569,7 @@ setnames(deltaR2, 2:length(deltaR2), c("deltaR2_jan (cal/(cm^2 sec))", "deltaR2_
 # Increment in total heat loss deltaH / deltaH2
 deltaH2 <- data.table(deltaE2, deltaC2, deltaR2)
 deltaH2[, c(14, 27) := NULL]
-setkeyv(deltaH2, "Plant_ID")
+setkey(deltaH2, Plant_ID)
 setnames(deltaH2 , 2:length(deltaH2), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
 # Sources 7 & 8 begin
 fun14 <- function(a, b, c) a + b + c
@@ -569,7 +588,7 @@ iteration2[, c(14, 27, 40, 53, 66, 79) := NULL]
 T3 <- data.table(T1, T2, deltaH1, deltaH2, deltaHf)
 T3[, c(14, 27, 40, 53) := NULL]
 setnames(T3, 2:length(T3), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
-setkeyv(T3, "Plant_ID")
+setkey(T3, Plant_ID)
 # Sources 7 & 8 begin
 fun15 <- function(a, b, c, d, e) { (a + (b - a) * ((e - c) / (d - c)))
 }
@@ -582,7 +601,7 @@ setnames(T3, 2:length(T3), c("T3_jan ()", "T3_feb ()", "T3_mar ()", "T3_apr ()",
 # Percent change in T' from previous iteration1
 percentchangeTprime2 <- data.table(T2, T3)
 percentchangeTprime2[, 14 := NULL]
-setkeyv(percentchangeTprime2, "Plant_ID")
+setkey(percentchangeTprime2, Plant_ID)
 setnames(percentchangeTprime2 , 2:length(percentchangeTprime2), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun16 <- function(a, b) ((b - a) / a) * 100
@@ -604,7 +623,7 @@ setnames(eTprime3, 2:length(eTprime3), c("e(T')3_jan ()", "e(T')3_feb ()", "e(T'
 # deltaE3 / deltaE3
 deltaE3 <- data.table(f_W_cm, initial_rho, heat_of_vaporization, e_T, eTprime3)
 deltaE3[, c(14, 27, 40, 53) := NULL]
-setkeyv(deltaE3, "Plant_ID")
+setkey(deltaE3, Plant_ID)
 setnames(deltaE3, 2:length(deltaE3), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
 # Sources 7 & 8 begin
 fun17 <- function(a, b, c, d, e) b * c * a * (e - d)
@@ -618,7 +637,7 @@ setnames(deltaE3, 2:length(deltaE3), c("deltaE3_jan (cal/(cm^2 sec))", "deltaE3_
 deltaC3 <- data.table(f_W_cm, initial_rho, T3, wt, fewsronly2)
 deltaC3[, c(14, 27, 40, 53) := NULL]
 setnames(deltaC3, 2:length(deltaC3), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
-setkeyv(deltaC3, "Plant_ID")
+setkey(deltaC3, Plant_ID)
 # Sources 7 & 8 begin
 fun18 <- function(a, b, c, d, e) a * ((b * e * constants$constants[9]) / constants$constants[10]) * (c - d)
 
@@ -630,7 +649,7 @@ setnames(deltaC3, 2:length(deltaC3), c("deltaC3_jan (cal/(cm^2 sec))", "deltaC3_
 # deltaR3 / deltaR3
 deltaR3 <- data.table(T3, wt)
 deltaR3[, 14 := NULL]
-setkeyv(deltaR3, "Plant_ID")
+setkey(deltaR3, Plant_ID)
 setnames(deltaR3, 2:length(deltaR3), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun19 <- function(a, b) (constants$constants[7] * constants$constants[8] / constants$constants[12]) * ((a + Kelvin) ^ 4 - (b + Kelvin) ^ 4)
@@ -643,7 +662,7 @@ setnames(deltaR3, 2:length(deltaR3), c("deltaR3_jan (cal/(cm^2 sec))", "deltaR3_
 # Increment in total heat loss deltaH / deltaH3
 deltaH3 <- data.table(deltaE3, deltaC3, deltaR3)
 deltaH3[, c(14, 27) := NULL]
-setkeyv(deltaH3, "Plant_ID")
+setkey(deltaH3, Plant_ID)
 setnames(deltaH3 , 2:length(deltaH3), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
 # Sources 7 & 8 begin
 fun20 <- function(a, b, c) a + b + c
@@ -663,7 +682,7 @@ iteration3[, c(14, 27, 40, 53, 66, 79) := NULL]
 T4 <- data.table(T2, T3, deltaH2, deltaH3, deltaHf)
 T4[, c(14, 27, 40, 53) := NULL]
 setnames(T4, 2:length(T4), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
-setkeyv(T4, "Plant_ID")
+setkey(T4, Plant_ID)
 # Source 7 - 9 begins
 fun21 <- function(a, b, c, d, e) { ifelse(d != c, (a + (b - a) * ((e - c) / (d - c))), b)
 }
@@ -672,13 +691,13 @@ T4a <- T4[, lapply(1:12, function(i) ifelse(!is.na(c(get(paste0('a', i)), get(pa
 # Source 7 - 9 ends
 T4 <- T4a[pmatch(T4$Plant_ID, T4a$Plant_ID), ]
 setnames(T4, 2:length(T4), c("T4_jan ()", "T4_feb ()", "T4_mar ()", "T4_apr ()", "T4_may ()", "T4_jun ()", "T4_jul ()", "T4_aug ()", "T4_sep ()", "T4_oct ()", "T4_nov ()", "T4_dec ()"))
-setkeyv(T4, "Plant_ID")
+setkey(T4, Plant_ID)
 
 
 # Percent change in T' from previous iteration1
 percentchangeTprime3 <- data.table(T3, T4)
 percentchangeTprime3[, 14 := NULL]
-setkeyv(percentchangeTprime3, "Plant_ID")
+setkey(percentchangeTprime3, Plant_ID)
 setnames(percentchangeTprime3 , 2:length(percentchangeTprime3), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun22 <- function(a, b) ((b - a) / a) * 100
@@ -700,7 +719,7 @@ setnames(eTprime4, 2:length(eTprime4), c("e(T')4_jan ()", "e(T')4_feb ()", "e(T'
 # deltaE4 / deltaE4
 deltaE4 <- data.table(f_W_cm, initial_rho, heat_of_vaporization, e_T, eTprime4)
 deltaE4[, c(14, 27, 40, 53) := NULL]
-setkeyv(deltaE4, "Plant_ID")
+setkey(deltaE4, Plant_ID)
 setnames(deltaE4, 2:length(deltaE4), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
 # Sources 7 & 8 begin
 fun23 <- function(a, b, c, d, e) b * c * a * (e - d)
@@ -714,7 +733,7 @@ setnames(deltaE4, 2:length(deltaE4), c("deltaE4_jan (cal/(cm^2 sec))", "deltaE4_
 deltaC4 <- data.table(f_W_cm, initial_rho, T4, wt, fewsronly2)
 deltaC4[, c(14, 27, 40, 53) := NULL]
 setnames(deltaC4, 2:length(deltaC4), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
-setkeyv(deltaC4, "Plant_ID")
+setkey(deltaC4, Plant_ID)
 # Sources 7 & 8 begin
 fun24 <- function(a, b, c, d, e) a * ((b * e * constants$constants[9]) / constants$constants[10]) * (c - d)
 
@@ -726,7 +745,7 @@ setnames(deltaC4, 2:length(deltaC4), c("deltaC4_jan (cal/(cm^2 sec))", "deltaC4_
 # deltaR4 / deltaR4
 deltaR4 <- data.table(T4, wt)
 deltaR4[, 14 := NULL]
-setkeyv(deltaR4, "Plant_ID")
+setkey(deltaR4, Plant_ID)
 setnames(deltaR4, 2:length(deltaR4), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun25 <- function(a, b) (constants$constants[7] * constants$constants[8] / constants$constants[12]) * ((a + Kelvin) ^ 4 - (b + Kelvin) ^ 4)
@@ -739,7 +758,7 @@ setnames(deltaR4, 2:length(deltaR4), c("deltaR4_jan (cal/(cm^2 sec))", "deltaR4_
 # Increment in total heat loss deltaH / deltaH4
 deltaH4 <- data.table(deltaE4, deltaC4, deltaR4)
 deltaH4[, c(14, 27) := NULL]
-setkeyv(deltaH4, "Plant_ID")
+setkey(deltaH4, Plant_ID)
 setnames(deltaH4 , 2:length(deltaH4), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
 # Sources 7 & 8 begin
 fun26 <- function(a, b, c) a + b + c
@@ -758,7 +777,7 @@ iteration4[, c(14, 27, 40, 53, 66, 79) := NULL]
 T5 <- data.table(T3, T4, deltaH3, deltaH4, deltaHf)
 T5[, c(14, 27, 40, 53) := NULL]
 setnames(T5, 2:length(T5), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
-setkeyv(T5, "Plant_ID")
+setkey(T5, Plant_ID)
 # Source 7 - 9 begins
 fun27 <- function(a, b, c, d, e) { ifelse(d != c, (a + (b - a) * ((e - c) / (d - c))), b)
 }
@@ -767,13 +786,13 @@ T5a <- T5[, lapply(1:12, function(i) ifelse(!is.na(c(get(paste0('a', i)), get(pa
 # Source 7 - 9 ends
 T5 <- T5a[pmatch(T5$Plant_ID, T5a$Plant_ID), ]
 setnames(T5, 2:length(T5), c("T5_jan ()", "T5_feb ()", "T5_mar ()", "T5_apr ()", "T5_may ()", "T5_jun ()", "T5_jul ()", "T5_aug ()", "T5_sep ()", "T5_oct ()", "T5_nov ()", "T5_dec ()"))
-setkeyv(T5, "Plant_ID")
+setkey(T5, Plant_ID)
 
 
 # Percent change in T' from previous iteration1
 percentchangeTprime4 <- data.table(T4, T5)
 percentchangeTprime4[, 14 := NULL]
-setkeyv(percentchangeTprime4, "Plant_ID")
+setkey(percentchangeTprime4, Plant_ID)
 setnames(percentchangeTprime4 , 2:length(percentchangeTprime4), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun28 <- function(a, b) ((b - a) / a) * 100
@@ -795,7 +814,7 @@ setnames(eTprime5, 2:length(eTprime5), c("e(T')5_jan ()", "e(T')5_feb ()", "e(T'
 # deltaE5 / deltaE5
 deltaE5 <- data.table(f_W_cm, initial_rho, heat_of_vaporization, e_T, eTprime5)
 deltaE5[, c(14, 27, 40, 53) := NULL]
-setkeyv(deltaE5, "Plant_ID")
+setkey(deltaE5, Plant_ID)
 setnames(deltaE5, 2:length(deltaE5), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
 # Sources 7 & 8 begin
 fun29 <- function(a, b, c, d, e) b * c * a * (e - d)
@@ -809,7 +828,7 @@ setnames(deltaE5, 2:length(deltaE5), c("deltaE5_jan (cal/(cm^2 sec))", "deltaE5_
 deltaC5 <- data.table(f_W_cm, initial_rho, T5, wt, fewsronly2)
 deltaC5[, c(14, 27, 40, 53) := NULL]
 setnames(deltaC5, 2:length(deltaC5), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
-setkeyv(deltaC5, "Plant_ID")
+setkey(deltaC5, Plant_ID)
 # Sources 7 & 8 begin
 fun30 <- function(a, b, c, d, e) a * ((b * e * constants$constants[9]) / constants$constants[10]) * (c - d)
 
@@ -821,7 +840,7 @@ setnames(deltaC5, 2:length(deltaC5), c("deltaC5_jan (cal/(cm^2 sec))", "deltaC5_
 # deltaR5 / deltaR5
 deltaR5 <- data.table(T5, wt)
 deltaR5[, 14 := NULL]
-setkeyv(deltaR5, "Plant_ID")
+setkey(deltaR5, Plant_ID)
 setnames(deltaR5, 2:length(deltaR5), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun31 <- function(a, b) (constants$constants[7] * constants$constants[8] / constants$constants[12]) * ((a + Kelvin) ^ 4 - (b + Kelvin) ^ 4)
@@ -834,7 +853,7 @@ setnames(deltaR5, 2:length(deltaR5), c("deltaR5_jan (cal/(cm^2 sec))", "deltaR5_
 # Increment in total heat loss deltaH / deltaH5
 deltaH5 <- data.table(deltaE5, deltaC5, deltaR5)
 deltaH5[, c(14, 27) := NULL]
-setkeyv(deltaH5, "Plant_ID")
+setkey(deltaH5, Plant_ID)
 setnames(deltaH5 , 2:length(deltaH5), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
 # Sources 7 & 8 begin
 fun32 <- function(a, b, c) a + b + c
@@ -854,7 +873,7 @@ iteration5[, c(14, 27, 40, 53, 66, 79) := NULL]
 T6 <- data.table(T4, T5, deltaH4, deltaH5, deltaHf)
 T6[, c(14, 27, 40, 53) := NULL]
 setnames(T6, 2:length(T6), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
-setkeyv(T6, "Plant_ID")
+setkey(T6, Plant_ID)
 # Source 7 - 9 begins
 fun33 <- function(a, b, c, d, e) { ifelse(d != c, (a + (b - a) * ((e - c) / (d - c))), b)
 }
@@ -863,13 +882,13 @@ T6a <- T6[, lapply(1:12, function(i) ifelse(!is.na(c(get(paste0('a', i)), get(pa
 # Source 7 - 9 ends
 T6 <- T6a[pmatch(T6$Plant_ID, T6a$Plant_ID), ]
 setnames(T6, 2:length(T6), c("T6_jan ()", "T6_feb ()", "T6_mar ()", "T6_apr ()", "T6_may ()", "T6_jun ()", "T6_jul ()", "T6_aug ()", "T6_sep ()", "T6_oct ()", "T6_nov ()", "T6_dec ()"))
-setkeyv(T6, "Plant_ID")
+setkey(T6, Plant_ID)
 
 
 # Percent change in T' from previous iteration1
 percentchangeTprime5 <- data.table(T5, T6)
 percentchangeTprime5[, 14 := NULL]
-setkeyv(percentchangeTprime5, "Plant_ID")
+setkey(percentchangeTprime5, Plant_ID)
 setnames(percentchangeTprime5 , 2:length(percentchangeTprime5), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun34 <- function(a, b) ((b - a) / a) * 100
@@ -891,7 +910,7 @@ setnames(eTprime6, 2:length(eTprime6), c("e(T')6_jan ()", "e(T')6_feb ()", "e(T'
 # deltaE6 / deltaE6
 deltaE6 <- data.table(f_W_cm, initial_rho, heat_of_vaporization, e_T, eTprime6)
 deltaE6[, c(14, 27, 40, 53) := NULL]
-setkeyv(deltaE6, "Plant_ID")
+setkey(deltaE6, Plant_ID)
 setnames(deltaE6, 2:length(deltaE6), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
 # Sources 7 & 8 begin
 fun35 <- function(a, b, c, d, e) b * c * a * (e - d)
@@ -905,7 +924,7 @@ setnames(deltaE6, 2:length(deltaE6), c("deltaE6_jan (cal/(cm^2 sec))", "deltaE6_
 deltaC6 <- data.table(f_W_cm, initial_rho, T6, wt, fewsronly2)
 deltaC6[, c(14, 27, 40, 53) := NULL]
 setnames(deltaC6, 2:length(deltaC6), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
-setkeyv(deltaC6, "Plant_ID")
+setkey(deltaC6, Plant_ID)
 # Sources 7 & 8 begin
 fun36 <- function(a, b, c, d, e) a * ((b * e * constants$constants[9]) / constants$constants[10]) * (c - d)
 
@@ -917,7 +936,7 @@ setnames(deltaC6, 2:length(deltaC6), c("deltaC6_jan (cal/(cm^2 sec))", "deltaC6_
 # deltaR6 / deltaR6
 deltaR6 <- data.table(T6, wt)
 deltaR6[, 14 := NULL]
-setkeyv(deltaR6, "Plant_ID")
+setkey(deltaR6, Plant_ID)
 setnames(deltaR6, 2:length(deltaR6), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun37 <- function(a, b) (constants$constants[7] * constants$constants[8] / constants$constants[12]) * ((a + Kelvin) ^ 4 - (b + Kelvin) ^ 4)
@@ -930,7 +949,7 @@ setnames(deltaR6, 2:length(deltaR6), c("deltaR6_jan (cal/(cm^2 sec))", "deltaR6_
 # Increment in total heat loss deltaH / deltaH6
 deltaH6 <- data.table(deltaE6, deltaC6, deltaR6)
 deltaH6[, c(14, 27) := NULL]
-setkeyv(deltaH6, "Plant_ID")
+setkey(deltaH6, Plant_ID)
 setnames(deltaH6 , 2:length(deltaH6), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
 # Sources 7 & 8 begin
 fun38 <- function(a, b, c) a + b + c
@@ -949,7 +968,7 @@ iteration6[, c(14, 27, 40, 53, 66, 79) := NULL]
 T7 <- data.table(T5, T6, deltaH5, deltaH6, deltaHf)
 T7[, c(14, 27, 40, 53) := NULL]
 setnames(T7, 2:length(T7), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
-setkeyv(T7, "Plant_ID")
+setkey(T7, Plant_ID)
 # Source 7 - 9 begins
 fun39 <- function(a, b, c, d, e) { ifelse(d != c, (a + (b - a) * ((e - c) / (d - c))), b)
 }
@@ -958,13 +977,13 @@ T7a <- T7[, lapply(1:12, function(i) ifelse(!is.na(c(get(paste0('a', i)), get(pa
 # Source 7 - 9 ends
 T7 <- T7a[pmatch(T7$Plant_ID, T7a$Plant_ID), ]
 setnames(T7, 2:length(T7), c("T7_jan ()", "T7_feb ()", "T7_mar ()", "T7_apr ()", "T7_may ()", "T7_jun ()", "T7_jul ()", "T7_aug ()", "T7_sep ()", "T7_oct ()", "T7_nov ()", "T7_dec ()"))
-setkeyv(T7, "Plant_ID")
+setkey(T7, Plant_ID)
 
 
 # Percent change in T' from previous iteration1
 percentchangeTprime6 <- data.table(T6, T7)
 percentchangeTprime6[, 14 := NULL]
-setkeyv(percentchangeTprime6, "Plant_ID")
+setkey(percentchangeTprime6, Plant_ID)
 setnames(percentchangeTprime6 , 2:length(percentchangeTprime6), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun40 <- function(a, b) ((b - a) / a) * 100
@@ -986,7 +1005,7 @@ setnames(eTprime7, 2:length(eTprime7), c("e(T')7_jan ()", "e(T')7_feb ()", "e(T'
 # deltaE7 / deltaE7
 deltaE7 <- data.table(f_W_cm, initial_rho, heat_of_vaporization, e_T, eTprime7)
 deltaE7[, c(14, 27, 40, 53) := NULL]
-setkeyv(deltaE7, "Plant_ID")
+setkey(deltaE7, Plant_ID)
 setnames(deltaE7, 2:length(deltaE7), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
 # Sources 7 & 8 begin
 fun41 <- function(a, b, c, d, e) b * c * a * (e - d)
@@ -1000,7 +1019,7 @@ setnames(deltaE7, 2:length(deltaE7), c("deltaE7_jan (cal/(cm^2 sec))", "deltaE7_
 deltaC7 <- data.table(f_W_cm, initial_rho, T7, wt, fewsronly2)
 deltaC7[, c(14, 27, 40, 53) := NULL]
 setnames(deltaC7, 2:length(deltaC7), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
-setkeyv(deltaC7, "Plant_ID")
+setkey(deltaC7, Plant_ID)
 # Sources 7 & 8 begin
 fun42 <- function(a, b, c, d, e) a * ((b * e * constants$constants[9]) / constants$constants[10]) * (c - d)
 
@@ -1012,7 +1031,7 @@ setnames(deltaC7, 2:length(deltaC7), c("deltaC7_jan (cal/(cm^2 sec))", "deltaC7_
 # deltaR7 / deltaR7
 deltaR7 <- data.table(T7, wt)
 deltaR7[, 14 := NULL]
-setkeyv(deltaR7, "Plant_ID")
+setkey(deltaR7, Plant_ID)
 setnames(deltaR7, 2:length(deltaR7), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun43 <- function(a, b) (constants$constants[7] * constants$constants[8] / constants$constants[12]) * ((a + Kelvin) ^ 4 - (b + Kelvin) ^ 4)
@@ -1025,7 +1044,7 @@ setnames(deltaR7, 2:length(deltaR7), c("deltaR7_jan (cal/(cm^2 sec))", "deltaR7_
 # Increment in total heat loss deltaH / deltaH7
 deltaH7 <- data.table(deltaE7, deltaC7, deltaR7)
 deltaH7[, c(14, 27) := NULL]
-setkeyv(deltaH7, "Plant_ID")
+setkey(deltaH7, Plant_ID)
 setnames(deltaH7 , 2:length(deltaH7), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
 # Sources 7 & 8 begin
 fun44 <- function(a, b, c) a + b + c
@@ -1046,7 +1065,7 @@ iteration7[, c(14, 27, 40, 53, 66, 79) := NULL]
 T8 <- data.table(T6, T7, deltaH6, deltaH7, deltaHf)
 T8[, c(14, 27, 40, 53) := NULL]
 setnames(T8, 2:length(T8), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
-setkeyv(T8, "Plant_ID")
+setkey(T8, Plant_ID)
 # Source 7 - 9 begins
 fun45 <- function(a, b, c, d, e) { ifelse(d != c, (a + (b - a) * ((e - c) / (d - c))), b)
 }
@@ -1055,13 +1074,13 @@ T8a <- T8[, lapply(1:12, function(i) ifelse(!is.na(c(get(paste0('a', i)), get(pa
 # Source 7 - 9 ends
 T8 <- T8a[pmatch(T8$Plant_ID, T8a$Plant_ID), ]
 setnames(T8, 2:length(T8), c("T8_jan ()", "T8_feb ()", "T8_mar ()", "T8_apr ()", "T8_may ()", "T8_jun ()", "T8_jul ()", "T8_aug ()", "T8_sep ()", "T8_oct ()", "T8_nov ()", "T8_dec ()"))
-setkeyv(T8, "Plant_ID")
+setkey(T8, Plant_ID)
 
 
 # Percent change in T' from previous iteration1
 percentchangeTprime7 <- data.table(T7, T8)
 percentchangeTprime7[, 14 := NULL]
-setkeyv(percentchangeTprime7, "Plant_ID")
+setkey(percentchangeTprime7, Plant_ID)
 setnames(percentchangeTprime7 , 2:length(percentchangeTprime7), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun46 <- function(a, b) ((b - a) / a) * 100
@@ -1083,7 +1102,7 @@ setnames(eTprime8, 2:length(eTprime8), c("e(T')8_jan ()", "e(T')8_feb ()", "e(T'
 # deltaE8 / deltaE8
 deltaE8 <- data.table(f_W_cm, initial_rho, heat_of_vaporization, e_T, eTprime8)
 deltaE8[, c(14, 27, 40, 53) := NULL]
-setkeyv(deltaE8, "Plant_ID")
+setkey(deltaE8, Plant_ID)
 setnames(deltaE8, 2:length(deltaE8), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
 # Sources 7 & 8 begin
 fun47 <- function(a, b, c, d, e) b * c * a * (e - d)
@@ -1097,7 +1116,7 @@ setnames(deltaE8, 2:length(deltaE8), c("deltaE8_jan (cal/(cm^2 sec))", "deltaE8_
 deltaC8 <- data.table(f_W_cm, initial_rho, T8, wt, fewsronly2)
 deltaC8[, c(14, 27, 40, 53) := NULL]
 setnames(deltaC8, 2:length(deltaC8), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
-setkeyv(deltaC8, "Plant_ID")
+setkey(deltaC8, Plant_ID)
 # Sources 7 & 8 begin
 fun48 <- function(a, b, c, d, e) a * ((b * e * constants$constants[9]) / constants$constants[10]) * (c - d)
 
@@ -1109,7 +1128,7 @@ setnames(deltaC8, 2:length(deltaC8), c("deltaC8_jan (cal/(cm^2 sec))", "deltaC8_
 # deltaR8 / deltaR8
 deltaR8 <- data.table(T8, wt)
 deltaR8[, 14 := NULL]
-setkeyv(deltaR8, "Plant_ID")
+setkey(deltaR8, Plant_ID)
 setnames(deltaR8, 2:length(deltaR8), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun49 <- function(a, b) (constants$constants[7] * constants$constants[8] / constants$constants[12]) * ((a + Kelvin) ^ 4 - (b + Kelvin) ^ 4)
@@ -1122,7 +1141,7 @@ setnames(deltaR8, 2:length(deltaR8), c("deltaR8_jan (cal/(cm^2 sec))", "deltaR8_
 # Increment in total heat loss deltaH / deltaH8
 deltaH8 <- data.table(deltaE8, deltaC8, deltaR8)
 deltaH8[, c(14, 27) := NULL]
-setkeyv(deltaH8, "Plant_ID")
+setkey(deltaH8, Plant_ID)
 setnames(deltaH8 , 2:length(deltaH8), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
 # Sources 7 & 8 begin
 fun50 <- function(a, b, c) a + b + c
@@ -1143,7 +1162,7 @@ iteration8[, c(14, 27, 40, 53, 66, 79) := NULL]
 T9 <- data.table(T7, T8, deltaH7, deltaH8, deltaHf)
 T9[, c(14, 27, 40, 53) := NULL]
 setnames(T9, 2:length(T9), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
-setkeyv(T9, "Plant_ID")
+setkey(T9, Plant_ID)
 # Source 7 - 9 begins
 fun51 <- function(a, b, c, d, e) { ifelse(d != c, (a + (b - a) * ((e - c) / (d - c))), b)
 }
@@ -1152,13 +1171,13 @@ T9a <- T9[, lapply(1:12, function(i) ifelse(!is.na(c(get(paste0('a', i)), get(pa
 # Source 7 - 9 ends
 T9 <- T9a[pmatch(T9$Plant_ID, T9a$Plant_ID), ]
 setnames(T9, 2:length(T9), c("T9_jan ()", "T9_feb ()", "T9_mar ()", "T9_apr ()", "T9_may ()", "T9_jun ()", "T9_jul ()", "T9_aug ()", "T9_sep ()", "T9_oct ()", "T9_nov ()", "T9_dec ()"))
-setkeyv(T9, "Plant_ID")
+setkey(T9, Plant_ID)
 
 
 # Percent change in T' from previous iteration1
 percentchangeTprime8 <- data.table(T8, T9)
 percentchangeTprime8[, 14 := NULL]
-setkeyv(percentchangeTprime8, "Plant_ID")
+setkey(percentchangeTprime8, Plant_ID)
 setnames(percentchangeTprime8 , 2:length(percentchangeTprime8), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun52 <- function(a, b) ((b - a) / a) * 100
@@ -1203,7 +1222,7 @@ setnames(eTprime9, 2:length(eTprime9), c("e(T')9_jan ()", "e(T')9_feb ()", "e(T'
 # deltaE9 / deltaE9
 deltaE9 <- data.table(f_W_cm, initial_rho, heat_of_vaporization, e_T, eTprime9)
 deltaE9[, c(14, 27, 40, 53) := NULL]
-setkeyv(deltaE9, "Plant_ID")
+setkey(deltaE9, Plant_ID)
 setnames(deltaE9, 2:length(deltaE9), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
 # Sources 7 & 8 begin
 fun53 <- function(a, b, c, d, e) b * c * a * (e - d)
@@ -1217,7 +1236,7 @@ setnames(deltaE9, 2:length(deltaE9), c("deltaE9_jan (cal/(cm^2 sec))", "deltaE9_
 deltaC9 <- data.table(f_W_cm, initial_rho, T9, wt, fewsronly2)
 deltaC9[, c(14, 27, 40, 53) := NULL]
 setnames(deltaC9, 2:length(deltaC9), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9", "e10", "e11", "e12"))
-setkeyv(deltaC9, "Plant_ID")
+setkey(deltaC9, Plant_ID)
 # Sources 7 & 8 begin
 fun54 <- function(a, b, c, d, e) a * ((b * e * constants$constants[9]) / constants$constants[10]) * (c - d)
 
@@ -1229,7 +1248,7 @@ setnames(deltaC9, 2:length(deltaC9), c("deltaC9_jan (cal/(cm^2 sec))", "deltaC9_
 # deltaR9 / deltaR9
 deltaR9 <- data.table(T9, wt)
 deltaR9[, 14 := NULL]
-setkeyv(deltaR9, "Plant_ID")
+setkey(deltaR9, Plant_ID)
 setnames(deltaR9, 2:length(deltaR9), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun55 <- function(a, b) (constants$constants[7] * constants$constants[8] / constants$constants[12]) * ((a + Kelvin) ^ 4 - (b + Kelvin) ^ 4)
@@ -1242,7 +1261,7 @@ setnames(deltaR9, 2:length(deltaR9), c("deltaR9_jan (cal/(cm^2 sec))", "deltaR9_
 # Increment in total heat loss deltaH / deltaH9
 deltaH9 <- data.table(deltaE9, deltaC9, deltaR9)
 deltaH9[, c(14, 27) := NULL]
-setkeyv(deltaH9, "Plant_ID")
+setkey(deltaH9, Plant_ID)
 setnames(deltaH9 , 2:length(deltaH9), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
 # Sources 7 & 8 begin
 fun56 <- function(a, b, c) a + b + c
@@ -1262,7 +1281,7 @@ iteration9[, c(14, 27, 40, 53, 66, 79) := NULL]
 # Heat of vaporization (cal/cc)
 heat_vaporization <- data.table(final_rho, heat_vapor)
 heat_vaporization[, 14 := NULL]
-setkeyv(heat_vaporization, "Plant_ID")
+setkey(heat_vaporization, Plant_ID)
 setnames(heat_vaporization, 2:length(heat_vaporization), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun57 <- function(a, b) a * b
@@ -1274,7 +1293,7 @@ setnames(heat_vaporization, 2:length(heat_vaporization), c("L_jan (cal/(cal/cc))
 
 # Volumetric heat of vaporization (Btu/gal)
 vol_heat_vaporization <- copy(heat_vaporization)
-setkeyv(vol_heat_vaporization, "Plant_ID")
+setkey(vol_heat_vaporization, Plant_ID)
 setnames(vol_heat_vaporization, 2:length(vol_heat_vaporization), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12"))
 # Sources 7 & 8 begin
 fun58 <- function(a, b) constants$constants[2] * a / constants$constants[1]
@@ -1289,7 +1308,7 @@ iteration9length <- c(74:length(iteration9))
 
 # Percent forced evaporation
 percent_forced_evap <- data.table(iteration9[, 1], iteration9[, c(38:49)], iteration9[, ..iteration9length])
-setkeyv(percent_forced_evap, "Plant_ID")
+setkey(percent_forced_evap, Plant_ID)
 setnames(percent_forced_evap, 2:length(percent_forced_evap), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun59 <- function(a, b) a / b
@@ -1302,7 +1321,7 @@ setnames(percent_forced_evap, 2:length(percent_forced_evap), c("percent forced e
 # Condenser duty per evaporated volume (MMBtu/gal)
 cond_duty_per_evap_vol <- data.table(vol_heat_vaporization, percent_forced_evap)
 cond_duty_per_evap_vol[, 14 := NULL]
-setkeyv(cond_duty_per_evap_vol, "Plant_ID")
+setkey(cond_duty_per_evap_vol, Plant_ID)
 setnames(cond_duty_per_evap_vol, 2:length(cond_duty_per_evap_vol), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun60 <- function(a, b) a / (b * 1000000)
@@ -1314,7 +1333,7 @@ setnames(cond_duty_per_evap_vol, 2:length(cond_duty_per_evap_vol), c("Condenser 
 
 # Evaporated volume per condenser duty (gal/MMBtu)
 evap_vol_per_cond_duty_MMBtu <- copy(cond_duty_per_evap_vol)
-setkeyv(evap_vol_per_cond_duty_MMBtu, "Plant_ID")
+setkey(evap_vol_per_cond_duty_MMBtu, Plant_ID)
 setnames(evap_vol_per_cond_duty_MMBtu, 2:length(evap_vol_per_cond_duty_MMBtu), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12"))
 # Sources 7 & 8 begin
 fun61 <- function(a) 1 / a
@@ -1326,7 +1345,7 @@ setnames(evap_vol_per_cond_duty_MMBtu, 2:length(evap_vol_per_cond_duty_MMBtu), c
 
 # Evaporated volume per condenser duty (gal/MWh thermal)
 evap_vol_per_cond_duty_MWh_thermal <- copy(cond_duty_per_evap_vol)
-setkeyv(evap_vol_per_cond_duty_MWh_thermal, "Plant_ID")
+setkey(evap_vol_per_cond_duty_MWh_thermal, Plant_ID)
 setnames(evap_vol_per_cond_duty_MWh_thermal, 2:length(evap_vol_per_cond_duty_MWh_thermal), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12"))
 # Sources 7 & 8 begin
 fun62 <- function(a) 3412000 / (a * 1000000)
@@ -1338,7 +1357,7 @@ setnames(evap_vol_per_cond_duty_MWh_thermal, 2:length(evap_vol_per_cond_duty_MWh
 
 # density at heated temperature (pounds per gallon)
 density_heat_T <- copy(final_rho)
-setkeyv(density_heat_T, "Plant_ID")
+setkey(density_heat_T, Plant_ID)
 setnames(density_heat_T, 2:length(density_heat_T), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12"))
 # Sources 7 & 8 begin
 fun63 <- function(a) a * constants$constants[2] / constants$constants[3]
@@ -1351,7 +1370,7 @@ setnames(density_heat_T, 2:length(density_heat_T), c("density at heated temperat
 # Heat of vaporization (Btu/lb)
 heat_vap <- data.table(vol_heat_vaporization, density_heat_T)
 heat_vap[, 14 := NULL]
-setkeyv(heat_vap, "Plant_ID")
+setkey(heat_vap, Plant_ID)
 setnames(heat_vap, 2:length(heat_vap), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun64 <- function(a, b) a / b
@@ -1385,7 +1404,7 @@ output_compare_lit <- data.table(heat_vaporization, vol_heat_vaporization, perce
 # Heated water temperature T' (deg C)
 # Estimated average water-surface temperature in the heated plume or cooling pond. Estimated temperatures above the boiling point won't be displayed.
 heat_water_temp_Tprime <- iteration8[, c(1:13)]
-setkeyv(heat_water_temp_Tprime, "Plant_ID")
+setkey(heat_water_temp_Tprime, Plant_ID)
 
 # Source 9 begins
 heat_water_temp_Tprimefunction <- function(x) {
@@ -1406,7 +1425,7 @@ setnames(heat_water_temp_Tprime, 2:length(heat_water_temp_Tprime), c("Heated wat
 # final ratio of delta T to heat loading
 deltaT_heat_loading_ratio_final <- data.table(heat_water_temp_Tprime, wt, deltaHf)
 deltaT_heat_loading_ratio_final[, c(14, 27) := NULL]
-setkeyv(deltaT_heat_loading_ratio_final, "Plant_ID")
+setkey(deltaT_heat_loading_ratio_final, Plant_ID)
 setnames(deltaT_heat_loading_ratio_final, 2:length(deltaT_heat_loading_ratio_final), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
 # Sources 7 & 8 begin
 fun65 <- function(a, b, c) (a - b) / c
@@ -1420,7 +1439,7 @@ of delta T to heat loading_dec"))
 # Percent change in T' in last iteration
 percent_change_Tprime_final_iteration <- data.table(iteration9[, c(1:13)], iteration8[, c(1:13)])
 percent_change_Tprime_final_iteration[, 14 := NULL]
-setkeyv(percent_change_Tprime_final_iteration, "Plant_ID")
+setkey(percent_change_Tprime_final_iteration, Plant_ID)
 setnames(percent_change_Tprime_final_iteration, 2:length(percent_change_Tprime_final_iteration), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 
 fun66 <- function(a, b) (abs(( a - b ) / a)) * 100
@@ -1431,7 +1450,7 @@ setnames(percent_change_Tprime_final_iteration, 2:length(percent_change_Tprime_f
 
 # Maximum Percent change in T' in last iteration
 max_percent_change_Tprime_final_iteration <- copy(percent_change_Tprime_final_iteration)
-setkeyv(max_percent_change_Tprime_final_iteration, "Plant_ID")
+setkey(max_percent_change_Tprime_final_iteration, Plant_ID)
 setnames(max_percent_change_Tprime_final_iteration, 2:length(max_percent_change_Tprime_final_iteration), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12"))
 # Sources 7 & 8 begin
 fun67 <- function(a) max(a, na.rm = TRUE)
@@ -1461,7 +1480,7 @@ setnames(max_percent_change_Tprime_final_iteration, c("Maximum percent change in
 # Heating of water (deg C)
 heat_water <- data.table(iteration9[, c(1:13)], wt)
 heat_water[, 14 := NULL]
-setkeyv(heat_water, "Plant_ID")
+setkey(heat_water, Plant_ID)
 setnames(heat_water, 2:length(heat_water), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun68 <- function(a, b) a - b
@@ -1475,7 +1494,7 @@ setnames(heat_water, 2:length(heat_water), c("Heating of water_jan (deg C)", "He
 # Estimated forced evaporation as a monthly depth.
 add_evap <- data.table(iteration9[, c(1, 38:49)], heat_vaporization, monthdays)
 add_evap[, 14 := NULL]
-setkeyv(add_evap, "Plant_ID")
+setkey(add_evap, Plant_ID)
 setnames(add_evap, 2:length(add_evap), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
 # Sources 7 & 8 begin
 fun69 <- function(a, b, c) (a / b) * constants$constants[12] * c
@@ -1497,7 +1516,7 @@ setnames(add_evap, 2:length(add_evap), c("Added evaporation_jan (cm/month)", "Ad
 # Evaporative cooling as percent of added heat
 # Estimated heat loss through forced evaporation as a percentage of heat added by power plant.
 evap_cool_percent_add_heat <- data.table(addedheatload, iteration9[, c(38:49)], iteration9[, ..iteration9length])
-setkeyv(evap_cool_percent_add_heat, "Plant_ID")
+setkey(evap_cool_percent_add_heat, Plant_ID)
 setnames(evap_cool_percent_add_heat, 2:length(evap_cool_percent_add_heat), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
 # Sources 7 & 8 begin
 fun70 <- function(a, b,  c) ifelse(a == 0, NA_real_, (b / c) * 100)
@@ -1509,7 +1528,7 @@ setnames(evap_cool_percent_add_heat, 2:length(evap_cool_percent_add_heat), c("Ev
 
 # Average of Evaporative cooling as percent of added heat
 mean_evap_cool_percent_add_heat <- data.table(evap_cool_percent_add_heat)
-setkeyv(mean_evap_cool_percent_add_heat, "Plant_ID")
+setkey(mean_evap_cool_percent_add_heat, Plant_ID)
 setnames(mean_evap_cool_percent_add_heat, 2:length(mean_evap_cool_percent_add_heat), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12"))
 # Sources 7 & 8 begin
 fun71 <- function(a) mean(a, na.rm = TRUE)
@@ -1532,7 +1551,7 @@ setnames(mean_evap_cool_percent_add_heat, c("Mean Evaporative cooling as percent
 # Evaporative cooling in million gallons per day for each month
 evap_cool_MGD_month <- data.table(addedheatload, duty, evap_vol_per_cond_duty_MMBtu, monthdays)
 evap_cool_MGD_month[, c(14, 27) := NULL]
-setkeyv(evap_cool_MGD_month, "Plant_ID")
+setkey(evap_cool_MGD_month, Plant_ID)
 setnames(evap_cool_MGD_month, 2:length(evap_cool_MGD_month), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12"))
 # Sources 7 & 8 begin
 fun72 <- function(a, b, c, d) ifelse(a == 0, NA_real_, b * c / (1000000 * d))
@@ -1549,7 +1568,7 @@ summary_output <- data.table(heat_water_temp_Tprime, evap_vol_per_cond_duty_MMBt
 ## Report these as our Best Consumption Estimates
 # millions of gallons at all plants
 evap_cool_all_plants_MG <- data.table(evap_cool_MGD_month, monthdays)
-setkeyv(evap_cool_all_plants_MG, "Plant_ID")
+setkey(evap_cool_all_plants_MG, Plant_ID)
 setnames(evap_cool_all_plants_MG, 2:length(evap_cool_all_plants_MG), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
 fun73 <- function(a, b) sum(a, na.rm = TRUE) * 24 * b
@@ -1562,7 +1581,7 @@ setnames(evap_cool_all_plants_MG, c("Millions gal evaporated at all plants_jan",
 
 # Calculations for annual average MGD Evaporative cooling/Consumption
 calc_annual_mean_MGD_consumpt <- data.table(evap_cool_MGD_month, monthdays)
-setkeyv(calc_annual_mean_MGD_consumpt, "Plant_ID")
+setkey(calc_annual_mean_MGD_consumpt, Plant_ID)
 setnames(calc_annual_mean_MGD_consumpt, 2:length(calc_annual_mean_MGD_consumpt), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 calc_annual_mean_MGD_consumpt[is.na(calc_annual_mean_MGD_consumpt)] <- 0 # Source 10
 
@@ -1589,7 +1608,7 @@ total_MGD_consumpt <- sum_mean_MGD_year_consumpt * 365
 ## Condenser heat rise
 # Estimated max condenser heat rise
 est_max_condenser_heat_rise <- copy(wt)
-setkeyv(est_max_condenser_heat_rise, "Plant_ID")
+setkey(est_max_condenser_heat_rise, Plant_ID)
 setnames(est_max_condenser_heat_rise, 2:length(est_max_condenser_heat_rise), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12"))
 # Sources 7 & 8 begin
 fun75 <- function(a) 49.6775 + -0.2514 * a
@@ -1601,7 +1620,7 @@ setnames(est_max_condenser_heat_rise, 2:length(est_max_condenser_heat_rise), c("
 
 # Estimated condenser heat rise
 est_condenser_heat_rise <- copy(wt)
-setkeyv(est_condenser_heat_rise, "Plant_ID")
+setkey(est_condenser_heat_rise, Plant_ID)
 setnames(est_condenser_heat_rise, 2:length(est_condenser_heat_rise), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12"))
 # Sources 7 & 8 begin
 fun76 <- function(a) 22.4645 + -0.1044 * a
@@ -1613,7 +1632,7 @@ setnames(est_condenser_heat_rise, 2:length(est_condenser_heat_rise), c("Estimate
 
 # Estimated minimum condenser heat rise
 est_min_condenser_heat_rise <- copy(wt)
-setkeyv(est_min_condenser_heat_rise, "Plant_ID")
+setkey(est_min_condenser_heat_rise, Plant_ID)
 setnames(est_min_condenser_heat_rise, 2:length(est_min_condenser_heat_rise), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12"))
 # Sources 7 & 8 begin
 fun77 <- function(a) 2.9419 + -0.0093 * a
@@ -1628,7 +1647,7 @@ setnames(est_min_condenser_heat_rise, 2:length(est_min_condenser_heat_rise), c("
 est_min_MGD_withdrawal <- data.table(duty, est_max_condenser_heat_rise, monthdays)
 est_min_MGD_withdrawal[, 14 := NULL]
 setnames(est_min_MGD_withdrawal, 2:length(est_min_MGD_withdrawal), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
-setkeyv(est_min_MGD_withdrawal, "Plant_ID")
+setkey(est_min_MGD_withdrawal, Plant_ID)
 # Sources 7 & 8 begin
 fun78 <- function(a, b, c) a / (b * 8.33 * c)
 
@@ -1640,7 +1659,7 @@ setnames(est_min_MGD_withdrawal, 2:length(est_min_MGD_withdrawal), c("Estimated 
 
 # Calculations for annual average MGD withdrawal
 calc_annual_mean_MGD_withdr <- data.table(est_min_MGD_withdrawal, monthdays)
-setkeyv(calc_annual_mean_MGD_withdr, "Plant_ID")
+setkey(calc_annual_mean_MGD_withdr, Plant_ID)
 setnames(calc_annual_mean_MGD_withdr, 2:length(calc_annual_mean_MGD_withdr), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 calc_annual_mean_MGD_withdr[is.na(calc_annual_mean_MGD_withdr)] <- 0 # Source 10
 
@@ -1670,7 +1689,7 @@ total_MGD_withdr <- mean_MGD_year1_withdr * 365
 est_MGD_withdrawal <- data.table(duty, est_condenser_heat_rise, monthdays)
 est_MGD_withdrawal[, 14 := NULL]
 setnames(est_MGD_withdrawal, 2:length(est_MGD_withdrawal), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
-setkeyv(est_MGD_withdrawal, "Plant_ID")
+setkey(est_MGD_withdrawal, Plant_ID)
 # Sources 7 & 8 begin
 fun80 <- function(a, b, c) a / (b * 8.33 * c)
 
@@ -1681,7 +1700,7 @@ setnames(est_MGD_withdrawal, 2:length(est_MGD_withdrawal), c("Estimated MGD With
 
 # Calculations for annual average MGD 2
 calc_annual_mean_MGD_withdr2 <- data.table(est_MGD_withdrawal, monthdays)
-setkeyv(calc_annual_mean_MGD_withdr2, "Plant_ID")
+setkey(calc_annual_mean_MGD_withdr2, Plant_ID)
 setnames(calc_annual_mean_MGD_withdr2, 2:length(calc_annual_mean_MGD_withdr2), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 calc_annual_mean_MGD_withdr2[is.na(calc_annual_mean_MGD_withdr2)] <- 0 # Source 10
 
@@ -1710,7 +1729,7 @@ total_MGD_withdr2 <- mean_MGD_year1_withdr2 * 365
 est_max_MGD_withdrawal <- data.table(duty, est_min_condenser_heat_rise, monthdays)
 est_max_MGD_withdrawal[, 14 := NULL]
 setnames(est_max_MGD_withdrawal, 2:length(est_max_MGD_withdrawal), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
-setkeyv(est_max_MGD_withdrawal, "Plant_ID")
+setkey(est_max_MGD_withdrawal, Plant_ID)
 # Sources 7 & 8 begin
 fun82 <- function(a, b, c) a / (b * 8.33 * c)
 
@@ -1721,7 +1740,7 @@ setnames(est_max_MGD_withdrawal, 2:length(est_max_MGD_withdrawal), c("Estimated 
 
 # Calculations for annual average MGD 3
 calc_annual_mean_MGD_withdr3 <- data.table(est_max_MGD_withdrawal, monthdays)
-setkeyv(calc_annual_mean_MGD_withdr3, "Plant_ID")
+setkey(calc_annual_mean_MGD_withdr3, Plant_ID)
 setnames(calc_annual_mean_MGD_withdr3, 2:length(calc_annual_mean_MGD_withdr3), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 calc_annual_mean_MGD_withdr3[is.na(calc_annual_mean_MGD_withdr3)] <- 0 # Source 10
 
@@ -1752,7 +1771,7 @@ total_MGD_withdr3 <- mean_MGD_year1_withdr3 * 365
 cushion1 <- 0.22 # input
 
 min_consumpt_cushion <- copy(evap_cool_MGD_month)
-setkeyv(min_consumpt_cushion, "Plant_ID")
+setkey(min_consumpt_cushion, Plant_ID)
 setnames(min_consumpt_cushion, 2:length(min_consumpt_cushion), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12"))
 
 min_consumpt_cushion[is.na(min_consumpt_cushion)] <- 0 # Source 10
@@ -1768,7 +1787,7 @@ setnames(min_consumpt_cushion, 2:length(min_consumpt_cushion), c("Minimum Consum
 # Maximum consumption
 # Maximum consumption in million gallons per day for each month
 max_consumpt_cushion <- copy(evap_cool_MGD_month)
-setkeyv(max_consumpt_cushion, "Plant_ID")
+setkey(max_consumpt_cushion, Plant_ID)
 setnames(max_consumpt_cushion, 2:length(max_consumpt_cushion), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12"))
 
 max_consumpt_cushion[is.na(max_consumpt_cushion)] <- 0 # Source 10
@@ -1787,7 +1806,7 @@ setnames(max_consumpt_cushion, 2:length(max_consumpt_cushion), c("Maximum Consum
 cushion2 <- 0 # input
 
 min_withdr_cushion <- copy(est_min_MGD_withdrawal)
-setkeyv(min_withdr_cushion, "Plant_ID")
+setkey(min_withdr_cushion, Plant_ID)
 setnames(min_withdr_cushion, 2:length(min_withdr_cushion), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12"))
 
 min_withdr_cushion[is.na(min_withdr_cushion)] <- 0 # Source 10
@@ -1803,7 +1822,7 @@ setnames(min_withdr_cushion, 2:length(min_withdr_cushion), c("Minimum Withdrawal
 # Maximum withdrawal
 # Maximum withdrawal in million gallons per day for each month
 max_withdr_cushion <- copy(est_max_MGD_withdrawal)
-setkeyv(max_withdr_cushion, "Plant_ID")
+setkey(max_withdr_cushion, Plant_ID)
 setnames(max_withdr_cushion, 2:length(max_withdr_cushion), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12"))
 
 max_withdr_cushion[is.na(max_withdr_cushion)] <- 0 # Source 10
@@ -1819,7 +1838,7 @@ setnames(max_withdr_cushion, 2:length(max_withdr_cushion), c("Maximum Withdrawal
 ## duty-weighted forced evap
 # Monthly duty totals
 Total_duty_month <- copy(duty)
-setkeyv(Total_duty_month, "Plant_ID")
+setkey(Total_duty_month, Plant_ID)
 
 Total_duty_month <- Total_duty_month[, lapply(.SD, sum), .SDcols = 2:13] # Source 12
 
@@ -1839,7 +1858,7 @@ Total_duty_year_ID_check <- sum(Total_duty_year_ID[, 2])
 # Evaporation energy - product of FEpercent and condenser duty
 evap_energy <- data.table(duty, evap_cool_percent_add_heat)
 evap_energy[, 14 := NULL]
-setkeyv(evap_energy, "Plant_ID")
+setkey(evap_energy, Plant_ID)
 setnames(evap_energy, 2:length(evap_energy), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 
 evap_energy[is.na(evap_energy)] <- 0 # Source 10
@@ -1867,7 +1886,7 @@ evap_energy_year <- sum(evap_energy_year_ID[, 2])
 # percent evaporation
 pct_evap <- data.table(evap_energy_year_ID, Total_duty_year_ID)
 pct_evap[, 3 := NULL]
-setkeyv(pct_evap, "Plant_ID")
+setkey(pct_evap, Plant_ID)
 setnames(pct_evap, 2:length(pct_evap), c("a1", "b1"))
 
 pct_evap[is.na(pct_evap)] <- 0 # Source 10

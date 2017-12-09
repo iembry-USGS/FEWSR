@@ -3,6 +3,7 @@
 export(fewsr)
 export(fewsr2)
 import(data.table)
+import(fastmatch)
 import(gWidgets2)
 import(gWidgets2tcltk)
 import(ggplot2)
