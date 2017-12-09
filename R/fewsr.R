@@ -1974,7 +1974,7 @@ addWorksheet(wb, "Min Withdrawal with 0% cushion") # adds the worksheet with the
 writeDataTable(wb, "Min Withdrawal with 0% cushion", min_withdr_cushion) # writes the data to the workbook
 setColWidths(wb, sheet = 9, cols = 1:ncol(min_withdr_cushion), widths = "auto")
 filesave <- tclvalue(tkgetSaveFile(title = "Save file as", filetypes = "{{MS Excel file} .xlsx}")) # Sources 3 & 17 / GUI file dialog to save the spreadsheet
-saveWorkbook(wb, filesave, overwrite = TRUE)
+saveWorkbook(wb, paste0(filesave, ".xlsx"), overwrite = TRUE)
 
 
 ## plot of Average percent evaporation by month
@@ -1987,7 +1987,7 @@ mean_evap_cool_percent_add_heat_plot <- data.frame(ordmonth, mean_evap_cool_perc
 names(mean_evap_cool_percent_add_heat_plot) <- c("Month", "Percent")
 
 plotsave <- tclvalue(tkgetSaveFile(title = "Save image as", filetypes = "{{PNG} .png}")) # Sources 3 & 17 / GUI file dialog to save the plot
-png(filename = plotsave, width = 480, height = 400, units = "px")
+png(filename = paste0(plotsave, ".png"), width = 480, height = 400, units = "px")
 p <- ggplot(mean_evap_cool_percent_add_heat_plot, aes(x = Month, y = Percent, group = 1)) + geom_point() + geom_line() + labs(x = "Month", y = "Percent", title = paste("Average percent evaporation by month,", type)) # Source 15
 print(p)
 dev.off()
@@ -1998,7 +1998,7 @@ dev.off()
 ## create csv file
 csvout <- cbind(evap_cool_all_plants_MG, evap_cool_MGD_month, max_consumpt_cushion, min_consumpt_cushion, est_MGD_withdrawal, est_max_MGD_withdrawal, est_min_MGD_withdrawal, max_withdr_cushion, min_withdr_cushion)
 filesave1 <- tclvalue(tkgetSaveFile(title = "Save csv file as", filetypes = "{{Comma-separated value file} .csv}")) # Sources 3 & 17 / GUI file dialog to save the spreadsheet
-fwrite(csvout, file = filesave1, row.names = FALSE, na = "")
+fwrite(csvout, file = paste0(filesave1, ".csv"), row.names = FALSE, na = "")
 
 
 ## plot of Average percent evaporation by month
@@ -2011,7 +2011,7 @@ mean_evap_cool_percent_add_heat_plot <- data.frame(ordmonth, mean_evap_cool_perc
 names(mean_evap_cool_percent_add_heat_plot) <- c("Month", "Percent")
 
 plotsave <- tclvalue(tkgetSaveFile(title = "Save image as", filetypes = "{{PNG} .png}")) # Sources 3 & 17 / GUI file dialog to save the plot
-png(filename = plotsave, width = 480, height = 400, units = "px")
+png(filename = paste0(plotsave, ".png"), width = 480, height = 400, units = "px")
 p <- ggplot(mean_evap_cool_percent_add_heat_plot, aes(x = Month, y = Percent, group = 1)) + geom_point() + geom_line() + labs(x = "Month", y = "Percent", title = paste("Average percent evaporation by month,", type)) # Source 15
 print(p)
 dev.off()
@@ -2049,13 +2049,13 @@ addWorksheet(wb, "Min Withdrawal with 0% cushion") # adds the worksheet with the
 writeDataTable(wb, "Min Withdrawal with 0% cushion", min_withdr_cushion) # writes the data to the workbook
 setColWidths(wb, sheet = 9, cols = 1:ncol(min_withdr_cushion), widths = "auto")
 filesave <- tclvalue(tkgetSaveFile(title = "Save file as", filetypes = "{{MS Excel file} .xlsx}")) # Sources 3 & 17 / GUI file dialog to save the spreadsheet
-saveWorkbook(wb, filesave, overwrite = TRUE)
+saveWorkbook(wb, paste0(filesave, ".xlsx"), overwrite = TRUE)
 
 
 ## create csv file
 csvout <- cbind(evap_cool_all_plants_MG, evap_cool_MGD_month, max_consumpt_cushion, min_consumpt_cushion, est_MGD_withdrawal, est_max_MGD_withdrawal, est_min_MGD_withdrawal, max_withdr_cushion, min_withdr_cushion)
 filesave1 <- tclvalue(tkgetSaveFile(title = "Save csv file as", filetypes = "{{Comma-separated value file} .csv}")) # Sources 3 & 17 / GUI file dialog to save the spreadsheet
-fwrite(csvout, file = filesave1, row.names = FALSE, na = "")
+fwrite(csvout, file = paste0(filesave1, ".csv"), row.names = FALSE, na = "")
 
 
 ## plot of Average percent evaporation by month
@@ -2068,7 +2068,7 @@ mean_evap_cool_percent_add_heat_plot <- data.frame(ordmonth, mean_evap_cool_perc
 names(mean_evap_cool_percent_add_heat_plot) <- c("Month", "Percent")
 
 plotsave <- tclvalue(tkgetSaveFile(title = "Save image as", filetypes = "{{PNG} .png}")) # Sources 3 & 17 / GUI file dialog to save the plot
-png(filename = plotsave, width = 480, height = 400, units = "px")
+png(filename = ppaste0(plotsave, ".png"), width = 480, height = 400, units = "px")
 p <- ggplot(mean_evap_cool_percent_add_heat_plot, aes(x = Month, y = Percent, group = 1)) + geom_point() + geom_line() + labs(x = "Month", y = "Percent", title = paste("Average percent evaporation by month,", type)) # Source 15
 print(p)
 dev.off()
