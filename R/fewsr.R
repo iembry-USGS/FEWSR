@@ -1308,7 +1308,7 @@ vol_heat_vaporization <- vol_heat_vaporization[, lapply(1:12, function(i) fun58(
 setnames(vol_heat_vaporization, 2:length(vol_heat_vaporization), c("Volumetric_L_jan (Btu/gal)", "Volumetric_L_feb (Btu/gal)", "Volumetric_L_mar (Btu/gal)", "Volumetric_L_apr (Btu/gal)", "Volumetric_L_may (Btu/gal)", "Volumetric_L_jun (Btu/gal)", "Volumetric_L_jul (Btu/gal)", "Volumetric_L_aug (Btu/gal)", "Volumetric_L_sep (Btu/gal)", "Volumetric_L_oct (Btu/gal)", "Volumetric_L_nov (Btu/gal)", "Volumetric_L_dec (Btu/gal)"))
 
 
-iteration9length <- names(iteration9)[, c(74:length(iteration9))]
+iteration9length <- names(iteration9)[c(74:length(iteration9))]
 
 
 # Percent forced evaporation
