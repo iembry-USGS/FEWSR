@@ -203,20 +203,20 @@ setkey(fewsronly, Plant_ID)
 
 # change all columns to character class
 # obtain the name of the column based on the column number
-change_class2 <- names(fewsronly[, 2:ncol(fewsronly)]) # name of all columns except column 1
-for (col in change_class2) set(fewsronly, j = col, value = as.character(fewsronly[[col]])) # Source 4
+change_class2 <- names(df[, 2:ncol(df)]) # name of all columns except column 1
+for (col in change_class2) set(df, j = col, value = as.character(df[[col]])) # Source 4
 
 
 # change all possible stored values for NA to R's NA
-for (col in change_class2) set(fewsronly, i = which(fewsronly[[col]] %fin% c("na", "NA", "N/A", "#N/A", "-", "")), j = col, value = NA_character_) # Source 4
+for (col in change_class2) set(df, i = which(df[[col]] %fin% c("na", "NA", "N/A", "#N/A", "-", "")), j = col, value = NA_character_) # Source 4
 
 
 # trim all white space surrounding numbers
-for (col in change_class2) set(fewsronly, j = col, value = stri_trim_both(fewsronly[[col]], pattern = "\\P{Wspace}")) # Source 4
+for (col in change_class2) set(df, j = col, value = stri_trim_both(df[[col]], pattern = "\\P{Wspace}")) # Source 4
 
 
 # replace all commas with nothing
-for (col in change_class2) set(fewsronly, j = col, value = stri_replace_all_fixed(fewsronly[[col]], ",", ""))
+for (col in change_class2) set(df, j = col, value = stri_replace_all_fixed(df[[col]], ",", ""))
 
 
 # changing columns to numeric class
