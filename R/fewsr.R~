@@ -1514,13 +1514,13 @@ setnames(add_evap, 2:length(add_evap), c("Added evaporation_jan (cm/month)", "Ad
 
 
 # Total heat loss increment = final deltaH
-# iteration9[, iteration9length, with = FALSE]
+# iteration9[, ..iteration9length]
 
 
 # increment percent
 # Evaporative cooling as percent of added heat
 # Estimated heat loss through forced evaporation as a percentage of heat added by power plant.
-evap_cool_percent_add_heat <- data.table(addedheatload, iteration9[, c(38:49)], iteration9[, iteration9length, with = FALSE])
+evap_cool_percent_add_heat <- data.table(addedheatload, iteration9[, c(38:49)], iteration9[, ..iteration9length])
 setkey(evap_cool_percent_add_heat, Plant_ID)
 setnames(evap_cool_percent_add_heat, 2:length(evap_cool_percent_add_heat), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12", "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10", "c11", "c12"))
 # Sources 7 & 8 begin
@@ -1567,7 +1567,7 @@ setnames(evap_cool_MGD_month, 2:length(evap_cool_MGD_month), c("Evaporative cool
 
 
 ## Final Summary output section
-summary_output <- data.table(heat_water_temp_Tprime, evap_vol_per_cond_duty_MMBtu, evap_vol_per_cond_duty_MWh_thermal, heat_water, add_evap, iteration9[, c(38:49)], iteration9[, iteration9length, with = FALSE], evap_cool_percent_add_heat, evap_cool_MGD_month, max_percent_change_Tprime_final_iteration, percent_change_Tprime_final_iteration)
+summary_output <- data.table(heat_water_temp_Tprime, evap_vol_per_cond_duty_MMBtu, evap_vol_per_cond_duty_MWh_thermal, heat_water, add_evap, iteration9[, c(38:49)], iteration9[, ..iteration9length], evap_cool_percent_add_heat, evap_cool_MGD_month, max_percent_change_Tprime_final_iteration, percent_change_Tprime_final_iteration)
 
 
 ## Report these as our Best Consumption Estimates
