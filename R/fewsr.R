@@ -234,7 +234,7 @@ fewsronly <- setDT(fewsronly)
 
 
 # now return NA as zero (0) to avoid logical error
-for (col in change_class2) set(fewsronly, which(fewsronly[[col]] == NA_real_), j = col, value = 0) # Source 4
+fewsronly[is.na(fewsronly)] <- 0 # Source 10
 setkey(fewsronly, Plant_ID)
 
 

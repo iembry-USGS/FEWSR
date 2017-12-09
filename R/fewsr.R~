@@ -230,9 +230,13 @@ fewsronly <- setDF(fewsronly)
 fewsronly <- fewsronly[!is.nan(colMeans(fewsronly[, 2:ncol(fewsronly)], na.rm = TRUE))] # Source 5 / remove columns with NA only
 riverrow <- rowSums(fewsronly[, 2:ncol(fewsronly)], na.rm = TRUE) # obtain the rowSums
 fewsronly <- fewsronly[which(riverrow != 0), ] # subset with the rows that do not have a sum of 0 (sum of 0 means that all rows are NA due to NA being removed)
-
 fewsronly <- setDT(fewsronly)
+
+
+# now return NA as zero (0) to avoid logical error
+fewsronly[is.na(fewsronly)] <- 0 # Source 10
 setkey(fewsronly, Plant_ID)
+
 
 setnames(fewsronly, c("Plant_ID", "Elevation above sea level, feet", "Pond Area (acres)", "duty_jan (MMBtu)", "duty_feb (MMBtu)", "duty_mar (MMBtu)", "duty_apr (MMBtu)",	"duty_may (MMBtu)", "duty_jun (MMBtu)",	"duty_jul (MMBtu)", "duty_aug (MMBtu)",	"duty_sep (MMBtu)", "duty_oct (MMBtu)",	"duty_nov (MMBtu)", "duty_dec (MMBtu)",	"db_jan (deg C)", "db_feb (deg C)", "db_mar (deg C)", "db_apr (deg C)", "db_may (deg C)", "db_jun (deg C)", "db_jul (deg C)", "db_aug (deg C)", "db_sep (deg C)", "db_oct (deg C)", "db_nov (deg C)", "db_dec (deg C)", "wb_jan (deg C)", "wb_feb (deg C)", "wb_mar (deg C)", "wb_apr (deg C)", "wb_may (deg C)", "wb_jun (deg C)", "wb_jul (deg C)", "wb_aug (deg C)", "wb_sep (deg C)", "wb_oct (deg C)", "wb_nov (deg C)", "wb_dec (deg C)", "wt_jan (deg C)", "wt_feb (deg C)", "wt_mar (deg C)", "wt_apr (deg C)", "wt_may (deg C)", "wt_jun (deg C)", "wt_jul (deg C)", "wt_aug (deg C)", "wt_sep (deg C)", "wt_oct (deg C)", "wt_nov (deg C)", "wt_dec (deg C)", "ws_jan (mph)", "ws_feb (mph)", "ws_mar (mph)", "ws_apr (mph)", "ws_may (mph)", "ws_jun (mph)", "ws_jul (mph)", "ws_aug (mph)", "ws_sep (mph)", "ws_oct (mph)", "ws_nov (mph)", "ws_dec (mph)")) # set column names
 
