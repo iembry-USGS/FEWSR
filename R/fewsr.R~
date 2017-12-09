@@ -110,6 +110,7 @@
 #' @import data.table
 #' @import grDevices
 #' @import utils
+#' @import stringi
 #' @import fastmatch
 #'
 #' @export
