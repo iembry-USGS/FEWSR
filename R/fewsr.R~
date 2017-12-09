@@ -1311,7 +1311,7 @@ setnames(vol_heat_vaporization, 2:length(vol_heat_vaporization), c("Volumetric_L
 #iteration9length <-
 
 # Percent forced evaporation
-percent_forced_evap <- data.table(iteration9[, 1], iteration9[, c(38:49)], iteration9[, c(74:length(iteration9)))
+percent_forced_evap <- data.table(iteration9[, 1], iteration9[, c(38:49)], iteration9[, c(74:length(iteration9))])
 setkey(percent_forced_evap, Plant_ID)
 setnames(percent_forced_evap, 2:length(percent_forced_evap), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin

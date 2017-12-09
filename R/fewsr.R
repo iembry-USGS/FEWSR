@@ -151,7 +151,7 @@ setPackageName("FEWSR", .global)
 
 .global$print = ""
 
-Plant_ID <- a <- b <- Month <- Percent <- ..NAduty <- ..iteration9length <- NULL
+Plant_ID <- a <- b <- Month <- Percent <- NULL
 
 # These are exported to prevent NOTEs from R CMD check, and checkUsage via compiler.
 # But also exporting them makes it clear (to users and other packages) that data.table uses these as symbols.
@@ -237,6 +237,13 @@ fewsronly <- setDT(fewsronly)
 fewsronly[is.na(fewsronly)] <- 0 # Source 10
 setkey(fewsronly, Plant_ID)
 
+# DONE ABOVE NOW
+#NAduty <- fewsronly[, grep("duty", names(fewsronly))] # find the column numbers that have duty in the column names
+
+#cols <- names(fewsronly[, ..NAduty]) # create cols, which is the names of those column numbers from NAduty
+
+#for (col in cols) set(fewsronly, which(is.na(fewsronly[[col]])), col, 0) # Source 16 / for all NAs named in cols, change the NA to 0
+
 
 setnames(fewsronly, c("Plant_ID", "Elevation above sea level, feet", "Pond Area (acres)", "duty_jan (MMBtu)", "duty_feb (MMBtu)", "duty_mar (MMBtu)", "duty_apr (MMBtu)",	"duty_may (MMBtu)", "duty_jun (MMBtu)",	"duty_jul (MMBtu)", "duty_aug (MMBtu)",	"duty_sep (MMBtu)", "duty_oct (MMBtu)",	"duty_nov (MMBtu)", "duty_dec (MMBtu)",	"db_jan (deg C)", "db_feb (deg C)", "db_mar (deg C)", "db_apr (deg C)", "db_may (deg C)", "db_jun (deg C)", "db_jul (deg C)", "db_aug (deg C)", "db_sep (deg C)", "db_oct (deg C)", "db_nov (deg C)", "db_dec (deg C)", "wb_jan (deg C)", "wb_feb (deg C)", "wb_mar (deg C)", "wb_apr (deg C)", "wb_may (deg C)", "wb_jun (deg C)", "wb_jul (deg C)", "wb_aug (deg C)", "wb_sep (deg C)", "wb_oct (deg C)", "wb_nov (deg C)", "wb_dec (deg C)", "wt_jan (deg C)", "wt_feb (deg C)", "wt_mar (deg C)", "wt_apr (deg C)", "wt_may (deg C)", "wt_jun (deg C)", "wt_jul (deg C)", "wt_aug (deg C)", "wt_sep (deg C)", "wt_oct (deg C)", "wt_nov (deg C)", "wt_dec (deg C)", "ws_jan (mph)", "ws_feb (mph)", "ws_mar (mph)", "ws_apr (mph)", "ws_may (mph)", "ws_jun (mph)", "ws_jul (mph)", "ws_aug (mph)", "ws_sep (mph)", "ws_oct (mph)", "ws_nov (mph)", "ws_dec (mph)")) # set column names
 
@@ -248,13 +255,6 @@ set(fewsronly, j = "Pressure", value = ((44331.514 - fewsronly$elevation) / 1188
 setnames(fewsronly, 64:65, c("Elevation above sea level, meters", "Pressure, mbar")) # set the column names
 setcolorder(fewsronly, c(1:2, 64:65, 3:63)) # rearrange the columns
 setkey(fewsronly, Plant_ID)
-
-NAduty <- fewsronly[, grep("duty", names(fewsronly))] # find the column numbers that have duty in the column names
-
-cols <- names(fewsronly[, ..NAduty]) # create cols, which is the names of those column numbers from NAduty
-
-for (col in cols) set(fewsronly, which(is.na(fewsronly[[col]])), col, 0) # Source 16 / for all NAs named in cols, change the NA to 0
-
 
 
 ## Other Input values
@@ -1308,10 +1308,11 @@ vol_heat_vaporization <- vol_heat_vaporization[, lapply(1:12, function(i) fun58(
 setnames(vol_heat_vaporization, 2:length(vol_heat_vaporization), c("Volumetric_L_jan (Btu/gal)", "Volumetric_L_feb (Btu/gal)", "Volumetric_L_mar (Btu/gal)", "Volumetric_L_apr (Btu/gal)", "Volumetric_L_may (Btu/gal)", "Volumetric_L_jun (Btu/gal)", "Volumetric_L_jul (Btu/gal)", "Volumetric_L_aug (Btu/gal)", "Volumetric_L_sep (Btu/gal)", "Volumetric_L_oct (Btu/gal)", "Volumetric_L_nov (Btu/gal)", "Volumetric_L_dec (Btu/gal)"))
 
 
-#iteration9length <-
+iteration9length <- names(iteration9)[, c(74:length(iteration9))]
+
 
 # Percent forced evaporation
-percent_forced_evap <- data.table(iteration9[, 1], iteration9[, c(38:49)], iteration9[, c(74:length(iteration9))])
+percent_forced_evap <- data.table(iteration9[, 1], iteration9[, c(38:49)], iteration9[, iteration9length, with = FALSE])
 setkey(percent_forced_evap, Plant_ID)
 setnames(percent_forced_evap, 2:length(percent_forced_evap), c("a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "a9", "a10", "a11", "a12", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "b9", "b10", "b11", "b12"))
 # Sources 7 & 8 begin
