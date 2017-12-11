@@ -2066,7 +2066,7 @@ mean_evap_cool_percent_add_heat_plot <- data.frame(ordmonth, mean_evap_cool_perc
 names(mean_evap_cool_percent_add_heat_plot) <- c("Month", "Percent")
 
 plotsave <- tclvalue(tkgetSaveFile(title = "Save image as", filetypes = "{{PNG} .png}")) # Sources 3 & 17 / GUI file dialog to save the plot
-png(filename = ppaste0(plotsave, ".png"), width = 480, height = 400, units = "px")
+png(filename = paste0(plotsave, ".png"), width = 480, height = 400, units = "px")
 p <- ggplot(mean_evap_cool_percent_add_heat_plot, aes(x = Month, y = Percent, group = 1)) + geom_point() + geom_line() + labs(x = "Month", y = "Percent", title = paste("Average percent evaporation by month,", type)) # Source 15
 print(p)
 dev.off()
