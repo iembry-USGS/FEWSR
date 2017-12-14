@@ -35,13 +35,13 @@ file input}
 \usage{
 fewsr(file = tk_choose.files(default = "", caption = "Select file to open",
   multi = FALSE, filters = matrix(c("Comma-separated value file", ".csv",
-  "MS Excel spreadsheet", ".xlsx", "MS Excel 97-2003 spreadsheet", ".xls",
-  "OpenDocument Spreadsheet", ".ods"), 8, 2, byrow = TRUE)), sheet = 1,
-  type = c("lake", "pond", "river"), output = c("csv", "xlsx", "both"))
+  "MS Excel spreadsheet", ".xlsx", "MS Excel 97-2003 spreadsheet", ".xls"), 8,
+  2, byrow = TRUE)), sheet = 1, type = c("lake", "pond", "river"),
+  output = c("csv", "xlsx", "both"))
 }
 \arguments{
 \item{file}{Input file will be selected through a file dialog
-[.xls(x), .csv, or .ods]}
+[.xls(x) or .csv]}
 
 \item{sheet}{Sheet number or sheet name for the input file}
 

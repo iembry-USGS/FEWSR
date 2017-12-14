@@ -6,7 +6,7 @@
 #' Multiplant Lake/Pond/River Version 3.104 - 2012/12/15
 #'
 #' @param file Input file will be selected through a file dialog
-#'          [.xls(x), .csv, or .ods]
+#'          [.xls(x) or .csv]
 #' @param sheet Sheet number or sheet name for the input file
 #' @param type The type of surface water feature (lake, pond, river)
 #' @param output The output format of the resulting spreadsheet
@@ -105,7 +105,6 @@
 #' @import rio
 #' @import readxl
 #' @import openxlsx
-#' @import readODS
 #' @import ggplot2
 #' @import tcltk
 #' @import gWidgets2
@@ -146,7 +145,7 @@ if (file.info(file)$size == 0) {
 
 
 # no visible binding for global variable NOTE
-# Source 19 and data.table package begins
+# Source 19 and 23 & data.table package begins
 
 .global <- new.env()
 
@@ -154,7 +153,7 @@ setPackageName("FEWSR", .global)
 
 .global$print = ""
 
-# Source 19 and data.table package ends
+# Source 19 and 23 & data.table package ends
 
 
 Plant_ID <- a <- b <- Month <- Percent <- NULL

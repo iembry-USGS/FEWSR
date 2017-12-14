@@ -6,7 +6,7 @@
 #' Multiplant Lake/Pond/River Version 3.104 - 2012/12/15
 #'
 #' @param file Input file will be selected through a file dialog
-#'          [.xls(x), .csv, or .ods]
+#'          [.xls(x) or .csv]
 #' @param sheet Sheet number or sheet name for the input file
 #' @param type The type of surface water feature (lake, pond, river)
 #' @param output The output format of the resulting spreadsheet
@@ -102,7 +102,6 @@
 #' @import rio
 #' @import readxl
 #' @import openxlsx
-#' @import readODS
 #' @import ggplot2
 #' @import tcltk
 #' @import gWidgets2
@@ -114,7 +113,7 @@
 #' @import fastmatch
 #'
 #' @export
-fewsr <- function (file = tk_choose.files(default = "", caption = "Select file to open", multi = FALSE, filters = matrix(c("Comma-separated value file", ".csv", "MS Excel spreadsheet", ".xlsx", "MS Excel 97-2003 spreadsheet", ".xls", "OpenDocument Spreadsheet", ".ods"), 8, 2, byrow = TRUE)), sheet = 1, type = c("lake", "pond", "river"), output  = c("csv", "xlsx", "both")) {
+fewsr <- function (file = tk_choose.files(default = "", caption = "Select file to open", multi = FALSE, filters = matrix(c("Comma-separated value file", ".csv", "MS Excel spreadsheet", ".xlsx", "MS Excel 97-2003 spreadsheet", ".xls"), 8, 2, byrow = TRUE)), sheet = 1, type = c("lake", "pond", "river"), output  = c("csv", "xlsx", "both")) {
 
 if (!nchar(file)) {
 
@@ -144,15 +143,12 @@ if (file.info(file)$size == 0) {
 
 
 # no visible binding for global variable NOTE
-# Source 19 and data.table package begins
-
+# Source 19 and 23 & data.table package begins
 .global <- new.env()
 
 setPackageName("FEWSR", .global)
 
 .global$print = ""
-
-# Source 19 and data.table package ends
 
 
 Plant_ID <- a <- b <- Month <- Percent <- NULL
@@ -164,6 +160,7 @@ Plant_ID <- a <- b <- Month <- Percent <- NULL
 # utils::globalVariables(c(".SD",".N")) was tried as well, but exporting seems better.
 # So even though .BY doesn't appear in this file, it should still be NULL here and exported because it's
 # defined in SDenv and can be used by users.
+# Source 19 and 23 & data.table package ends
 
 
 fewsronly <- import(file, which = sheet)
