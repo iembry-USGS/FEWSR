@@ -102,6 +102,7 @@
 #' }
 #'
 #'
+#' @importFrom methods setPackageName
 #' @import rio
 #' @import readxl
 #' @import openxlsx

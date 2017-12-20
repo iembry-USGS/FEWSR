@@ -4,7 +4,7 @@ Version: 1.0.0
 Depends: R (>= 3.3.0), utils, tcltk, data.table (>= 1.9.8)
 Imports: rio (>= 0.5.5), readxl (>= 1.0.0), openxlsx (>= 4.0.17),
     grDevices, ggplot2 (>= 2.2.0), gWidgets2 (>= 1.0-7),
-    gWidgets2tcltk (>= 1.0-5)
+    gWidgets2tcltk (>= 1.0-5), fastmatch, stringi, methods
 Suggests: Rcpp (>= 0.11.6), knitr, rmarkdown
 Author: Timothy H. Diehl [aut, cre] (Microsoft Excel(R) spreadsheets),
     Irucka Embry [aut] (R code)

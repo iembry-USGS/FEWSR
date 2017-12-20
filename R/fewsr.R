@@ -99,6 +99,7 @@
 #' # The sheet number is 4 and the surface water is lake
 #' }
 #'
+#' @importFrom methods setPackageName
 #' @import rio
 #' @import readxl
 #' @import openxlsx
