@@ -40,7 +40,7 @@ openXL(file.path(system.file("extdata", "FEWS_River_plants_input.xlsx", package 
 
 ```{r eval = FALSE}
 # Examples to show different use cases
-fewsr2(file.path(system.file("extdata", "FEWS_River_plants_input.xlsx", package = "FEWSR"))), type = "river", output = "both"
+fewsr2(file.path(system.file("extdata", "FEWS_River_plants_input.xlsx", package = "FEWSR")), type = "river", output = "both")
 # The sheet number is 1 (default) and the surface water is river
 
 
