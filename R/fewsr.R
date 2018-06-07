@@ -163,9 +163,20 @@ Plant_ID <- a <- b <- Month <- Percent <- NULL
 # defined in SDenv and can be used by users.
 # Source 19 and 23 & data.table package ends
 
+if (grepl("*.csv", file)) {
+
+fewsronly <- import(file)
+
+fewsronly <- fewsronly[-1, ]
+
+fewsronly <- setDT(fewsronly)
+
+} else {
 
 fewsronly <- import(file, which = sheet)
 fewsronly <- setDT(fewsronly)
+
+}
 
 
 ## Input values

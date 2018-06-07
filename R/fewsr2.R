@@ -5,8 +5,7 @@
 #'     wind function
 #' Multiplant Lake/Pond/River Version 3.104 - 2012/12/15
 #'
-#' @param file Input file will be selected through a file dialog
-#'          [.xls(x) or .csv]
+#' @param file Path of input file chosen by the user [.xls(x) or .csv]
 #' @param sheet Sheet number or sheet name for the input file
 #' @param type The type of surface water feature (lake, pond, river)
 #' @param output The output format of the resulting spreadsheet
@@ -142,19 +141,17 @@ if (file.info(file)$size == 0) {
 
   } else {
 
+
 # Input provides the following parameters: Plant ID, Elevation (feet), Pond Area (acres), Added heat load (MMBtu) Jan - Dec, Dry bulb air temperature Ta (deg C) Jan - Dec, Wet bulb air temperature Twb (deg C) Jan - Dec, Natural water temperature T (deg C) Jan - Dec, Wind speed at 2m W (mph) Jan - Dec.
 
 
 # no visible binding for global variable NOTE
 # Source 19 and 23 & data.table package begins
-
 .global <- new.env()
 
 setPackageName("FEWSR", .global)
 
 .global$print = ""
-
-# Source 19 and 23 & data.table package ends
 
 
 Plant_ID <- a <- b <- Month <- Percent <- NULL
@@ -166,10 +163,22 @@ Plant_ID <- a <- b <- Month <- Percent <- NULL
 # utils::globalVariables(c(".SD",".N")) was tried as well, but exporting seems better.
 # So even though .BY doesn't appear in this file, it should still be NULL here and exported because it's
 # defined in SDenv and can be used by users.
+# Source 19 and 23 & data.table package ends
 
+if (grepl("*.csv", file)) {
+
+fewsronly <- import(file)
+
+fewsronly <- fewsronly[-1, ]
+
+fewsronly <- setDT(fewsronly)
+
+} else {
 
 fewsronly <- import(file, which = sheet)
 fewsronly <- setDT(fewsronly)
+
+}
 
 
 ## Input values

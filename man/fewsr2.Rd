@@ -37,8 +37,7 @@ fewsr2(file, sheet = 1, type = c("lake", "pond", "river"),
   output = c("csv", "xlsx", "both"))
 }
 \arguments{
-\item{file}{Input file will be selected through a file dialog
-[.xls(x) or .csv]}
+\item{file}{Path of input file chosen by the user [.xls(x) or .csv]}
 
 \item{sheet}{Sheet number or sheet name for the input file}
 
