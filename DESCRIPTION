@@ -1,10 +1,11 @@
 Package: FEWSR
 Title: FEWS Multiplant Model
 Version: 1.0.0
-Depends: R (>= 3.3.0), utils, tcltk, data.table (>= 1.9.8)
-Imports: rio (>= 0.5.5), readxl (>= 1.0.0), openxlsx (>= 4.0.17),
+Depends: R (>= 3.3.0), utils, tcltk, data.table (>= 1.10.2)
+Imports: rio (>= 0.5.8), readxl (>= 1.0.0), openxlsx (>= 4.1.0),
     grDevices, ggplot2 (>= 2.2.0), gWidgets2 (>= 1.0-7),
-    gWidgets2tcltk (>= 1.0-5), fastmatch, stringi, methods
+    gWidgets2tcltk (>= 1.0-5), fastmatch, stringi, methods, assertthat,
+    fpCompare
 Suggests: Rcpp (>= 0.11.6), knitr, rmarkdown
 Author: Timothy H. Diehl [aut, cre] (Microsoft Excel(R) spreadsheets),
     Irucka Embry [aut] (R code)
@@ -26,5 +27,5 @@ Copyright: This software is in the public domain because it contains materials
     http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 LazyData: true
 Encoding: UTF-8
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 VignetteBuilder: knitr

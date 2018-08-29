@@ -23,10 +23,21 @@ install.packages("FEWSR")
 ```
 
 
+
+# FEWSR Vignettes
+
+```R
+# the user can view the vignettes with the following command:
+
+browseVignettes("FEWSR")
+```
+
+
+
 # Examples
 
 ```R
-# interactive FEWSR version examples
+## interactive FEWSR examples (the user selects the input file via a file dialog)
 
 library("FEWSR")
 
@@ -40,7 +51,26 @@ fewsr(type = "river", output = "xlsx")
 
 fewsr(sheet = 4, type = "lake", output = "both")
 # The sheet number is 4 and the surface water is lake
+
+
+
+## non-interactive FEWSR examples (the user provides the input file)
+
+library("FEWSR")
+
+fewsr2(file.path(system.file("extdata", "FEWS_Pond_plants_input.xlsx",
+package = "FEWSR"), type = "pond", output = "csv"))
+# The sheet number is 1 (default) and the surface water is pond
+
+
+
+file <- "river_input.csv"
+# it is assumed that the input file is located within your current working directory
+
+fewsr2(file, type = "river", output = "xlsx"))
+# The sheet number is 1 (default) and the surface water is river
 ```
+
 
 
 # Disclaimer

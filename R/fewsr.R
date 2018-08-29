@@ -111,33 +111,29 @@
 #' @import grDevices
 #' @import utils
 #' @import stringi
+#' @import fpCompare
 #' @import fastmatch
+#' @import assertthat
 #'
 #' @export
 fewsr <- function (file = tk_choose.files(default = "", caption = "Select file to open", multi = FALSE, filters = matrix(c("Comma-separated value file", ".csv", "MS Excel spreadsheet", ".xlsx", "MS Excel 97-2003 spreadsheet", ".xls"), 6, 2, byrow = TRUE)), sheet = 1, type = c("lake", "pond", "river"), output  = c("csv", "xlsx", "both")) {
 
-if (!nchar(file)) {
 
-  stop("You did not choose a file. Please select a file again.")
+# Check for file information
+assert_that(!(nchar(file) %==% 0 == TRUE), msg = "You did not choose a file. Please select a file again.")
 # Source 2 / provide a stop warning if no file was selected
-
-  } else {
 
 confirm <- gconfirm(toolkit = guiToolkit("tcltk"), msg = paste0("Do you want to select", " ", file, "?"), title = "Confirm", icon = "question")
 
-if (confirm == FALSE) {
-
-  stop("Please try again with a different file.")
+assert_that(!confirm == FALSE, msg = "You did not confirm the selection of the file. Please try again with a different file.")
 # Source 2 / provide a stop warning if the user wants to change the file
 
-  } else {
-
-if (file.info(file)$size == 0) {
-
-  stop("Your file is empty. Please try again with a different file.")
+assert_that(!file.info(file)$size %==% 0 == TRUE, msg = "Your file is empty. Please try again with a different file.")
 # Sources 1 & 2 / only process non-empty files and provide a stop warning if the input file is empty
 
-  } else {
+assert_that(any(has_extension(file, c("csv", "xlsx", "xls"))), msg = "Your file does not have a .csv or .xls(x) extension. Please try again with a different file.")
+# only process files that have a .csv, .xlsx, or .xls extension
+
 
 
 # Input provides the following parameters: Plant ID, Elevation (feet), Pond Area (acres), Added heat load (MMBtu) Jan - Dec, Dry bulb air temperature Ta (deg C) Jan - Dec, Wet bulb air temperature Twb (deg C) Jan - Dec, Natural water temperature T (deg C) Jan - Dec, Wind speed at 2m W (mph) Jan - Dec.
@@ -165,7 +161,15 @@ Plant_ID <- a <- b <- Month <- Percent <- NULL
 
 if (grepl("*.csv", file)) {
 
-fewsronly <- import(file)
+fewsronly <- import(file, header = FALSE, na.strings = getOption("datatable.na.strings", c("na", "NA", "N/A", "#N/A", "-", "")))
+
+assert_that(fewsronly[3, 1] == "Minimum heat loading", msg = "Please check that 'Minimum heat loading' is in Row 3, Column 1 in the input file. Please try again with a different file.")
+
+assert_that(all(grepl("([0-9])", fewsronly[4, 1:4])), msg = "Please check that Row 4, Columns 1 - 4 are numeric in the input file. Please try again with a different file.")
+
+assert_that(fewsronly[6, 1] == "Plant ID", msg = "Please check that 'Plant ID' is in Row 6, Column 1 in the input file. Please try again with a different file.")
+
+assert_that(all(grepl("([0-9])", fewsronly[7, 2:63])), msg = "Please check that Row 7, Columns 2 - 63 are numeric in the input file. Please try again with a different file.")
 
 fewsronly <- fewsronly[-1, ]
 
@@ -173,7 +177,18 @@ fewsronly <- setDT(fewsronly)
 
 } else {
 
-fewsronly <- import(file, which = sheet)
+fewsronly <- import(file, which = sheet, col_names = FALSE, na = c("na", "NA", "N/A", "#N/A", "-", ""))
+
+assert_that(fewsronly[3, 1] == "Minimum heat loading", msg = "Please check that 'Minimum heat loading' is in Row 3, Column 1 in the input file. Please try again with a different file.")
+
+assert_that(all(grepl("([0-9])", fewsronly[4, 1:4])), msg = "Please check that Row 4, Columns 1 - 4 are numeric in the input file. Please try again with a different file.")
+
+assert_that(fewsronly[6, 1] == "Plant ID", msg = "Please check that 'Plant ID' is in Row 6, Column 1 in the input file. Please try again with a different file.")
+
+assert_that(all(grepl("([0-9])", fewsronly[7, 2:63])), msg = "Please check that Row 7, Columns 2 - 63 are numeric in the input file. Please try again with a different file.")
+
+fewsronly <- fewsronly[-1, ]
+
 fewsronly <- setDT(fewsronly)
 
 }
@@ -209,24 +224,20 @@ setkey(fewsronly, Plant_ID)
 
 
 
-# changing column to character class
+# change all columns to character class
 # obtain the name of the column based on the column number
-change_class1 <- "Plant_ID"
+change_class1 <- names(fewsronly)
 for (col in change_class1) set(fewsronly, j = col, value = as.character(fewsronly[[col]])) # Source 4
 setkey(fewsronly, Plant_ID)
 
 
-# change all columns to character class
-# obtain the name of the column based on the column number
-change_class2 <- names(fewsronly[, 2:ncol(fewsronly)]) # name of all columns except column 1
-for (col in change_class2) set(fewsronly, j = col, value = as.character(fewsronly[[col]])) # Source 4
-
-
 # change all possible stored values for NA to R's NA
-for (col in change_class2) set(fewsronly, i = which(fewsronly[[col]] %fin% c("na", "NA", "N/A", "#N/A", "-", "")), j = col, value = NA_character_) # Source 4
+#for (col in change_class2) set(fewsronly, i = which(fewsronly[[col]] %fin% c()), j = col, value = NA_character_) # Source 4
 
 
+# obtain the name of the column based on the column number
 # trim all white space surrounding numbers
+change_class2 <- names(fewsronly[, 2:ncol(fewsronly)]) # names of all columns except column 1
 for (col in change_class2) set(fewsronly, j = col, value = stri_trim_both(fewsronly[[col]], pattern = "\\P{Wspace}")) # Source 4
 
 
@@ -1930,21 +1941,21 @@ total_withdrawal_MGD <- mean_MGD_year1_withdr2
 
 
 # collect all objects to ensure that the order of Plant_ID matches what was available in the beginning
-evap_cool_MGD_month <- evap_cool_MGD_month[match(order_check, evap_cool_MGD_month$Plant_ID)] # Source 23
+evap_cool_MGD_month <- evap_cool_MGD_month[fmatch(order_check, evap_cool_MGD_month$Plant_ID)] # Source 23
 
-max_consumpt_cushion <- max_consumpt_cushion[match(order_check, max_consumpt_cushion$Plant_ID)] # Source 23
+max_consumpt_cushion <- max_consumpt_cushion[fmatch(order_check, max_consumpt_cushion$Plant_ID)] # Source 23
 
-min_consumpt_cushion <- min_consumpt_cushion[match(order_check, min_consumpt_cushion$Plant_ID)] # Source 23
+min_consumpt_cushion <- min_consumpt_cushion[fmatch(order_check, min_consumpt_cushion$Plant_ID)] # Source 23
 
-est_MGD_withdrawal <- est_MGD_withdrawal[match(order_check, est_MGD_withdrawal$Plant_ID)] # Source 23
+est_MGD_withdrawal <- est_MGD_withdrawal[fmatch(order_check, est_MGD_withdrawal$Plant_ID)] # Source 23
 
-est_max_MGD_withdrawal <- est_max_MGD_withdrawal[match(order_check, est_max_MGD_withdrawal$Plant_ID)] # Source 23
+est_max_MGD_withdrawal <- est_max_MGD_withdrawal[fmatch(order_check, est_max_MGD_withdrawal$Plant_ID)] # Source 23
 
-est_min_MGD_withdrawal <- est_min_MGD_withdrawal[match(order_check, est_min_MGD_withdrawal$Plant_ID)] # Source 23
+est_min_MGD_withdrawal <- est_min_MGD_withdrawal[fmatch(order_check, est_min_MGD_withdrawal$Plant_ID)] # Source 23
 
-max_withdr_cushion <- max_withdr_cushion[match(order_check, max_withdr_cushion$Plant_ID)] # Source 23
+max_withdr_cushion <- max_withdr_cushion[fmatch(order_check, max_withdr_cushion$Plant_ID)] # Source 23
 
-min_withdr_cushion <- min_withdr_cushion[match(order_check, min_withdr_cushion$Plant_ID)] # Source 23
+min_withdr_cushion <- min_withdr_cushion[fmatch(order_check, min_withdr_cushion$Plant_ID)] # Source 23
 
 
 
@@ -2080,8 +2091,5 @@ p <- ggplot(mean_evap_cool_percent_add_heat_plot, aes(x = Month, y = Percent, gr
 print(p)
 dev.off()
 
-}
-}
-}
 }
 }

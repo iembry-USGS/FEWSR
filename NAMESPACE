@@ -2,8 +2,10 @@
 
 export(fewsr)
 export(fewsr2)
+import(assertthat)
 import(data.table)
 import(fastmatch)
+import(fpCompare)
 import(gWidgets2)
 import(gWidgets2tcltk)
 import(ggplot2)
