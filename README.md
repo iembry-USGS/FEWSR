@@ -59,7 +59,7 @@ fewsr(sheet = 4, type = "lake", output = "both")
 library("FEWSR")
 
 fewsr2(file.path(system.file("extdata", "FEWS_Pond_plants_input.xlsx",
-package = "FEWSR"), type = "pond", output = "csv"))
+package = "FEWSR")), type = "pond", output = "csv")
 # The sheet number is 1 (default) and the surface water is pond
 
 
